@@ -10,7 +10,7 @@ public class EmployeeEntity
     [Required]
     public string Email { get; set; } = null!;
 
-    //KOpplingar
+    //Kopplingar
     public int RoleId { get; set; }
     public RoleEntity Role { get; set; } = null!;
 
