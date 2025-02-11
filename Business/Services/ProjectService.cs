@@ -17,8 +17,13 @@ public class ProjectService(IProjectRepository projectRepository) : IProjectServ
         var existingProject = await _projectRepository.GetAsync(x => x.Title == form.Title);
         if (existingProject != null)
             return null!;
+        
 
         var entity = await _projectRepository.CreateAsync(ProjectFactory.Create(form));
+
+        if (entity == null)
+            return null!;
+        
         var project = ProjectFactory.Create(entity);
 
         return project ?? null!;

@@ -19,6 +19,7 @@
 --INSERT INTO Projects VALUES ('Website Project', 'Building a website for ABC Data', '2024-03-01', '2024-06-01', 15000, 5, 1, 2, 1);
 --INSERT INTO CustomerContacts VALUES ('Martin Bergsten', '070000000', 'martin@abcdata.com', 1)
 
+/*
 SELECT 
     CONCAT('P-', p.Id) AS 'ProjectId',
     p.Title,
@@ -35,3 +36,7 @@ JOIN Status s ON p.StatusId = s.Id
 JOIN Customers c ON p.CustomerId = c.Id
 JOIN Employees e ON p.EmployeeId = e.Id
 LEFT JOIN CustomerContacts cc ON c.Id = cc.CustomerId;
+*/
+
+
+DELETE FROM Customers WHERE Id = 9;

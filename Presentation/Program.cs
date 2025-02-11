@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Business.Services;
 using Business.Interfaces;
 using Business.Dtos;
+using Presentation.Dialogs;
 
 var serviceCollection = new ServiceCollection();
 
@@ -17,15 +18,26 @@ serviceCollection.AddScoped<ICustomerRepository, CustomerRepository>();
 serviceCollection.AddScoped<IEmployeeRepository, EmployeeRepository>();
 serviceCollection.AddScoped<ICustomerContactRepository, CustomerContactRepository>();
 
+
 //Service
 serviceCollection.AddScoped<IProjectService, ProjectService>();
 serviceCollection.AddScoped<IEmployeeService, EmployeeService>();
 serviceCollection.AddScoped<ICustomerService, CustomerService>();
 serviceCollection.AddScoped<ICustomerContactService, CustomerContactService>();
 
+//Menu
+serviceCollection.AddScoped<IMenuDialogs, MenuDialogs>();
+
 
 var serviceProvider = serviceCollection.BuildServiceProvider();
 
+var menuDialogs = serviceProvider.GetRequiredService<IMenuDialogs>();
+await menuDialogs.MenuOptions();
+
+
+
+
+/*
 //READ
 
 //CustomerService
@@ -79,3 +91,4 @@ foreach (var project in projects)
     Console.WriteLine("----------------------------------------");
 }
 Console.ReadLine();
+*/

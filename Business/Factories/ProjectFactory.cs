@@ -8,13 +8,17 @@ public static class ProjectFactory
 {
     public static ProjectRegistrationForm Create() => new();
 
+
     public static ProjectEntity Create(ProjectRegistrationForm form) => new()
     {
         Title = form.Title,
         Description = form.Description,
         StartDate = form.StartDate,
         EndDate = form.EndDate,
-    };
+        EmployeeId = form.EmployeeId,
+        TotalPrice = form.TotalPrice,
+        CustomerId = form.CustomerId,
+};
 
     public static ProjectModel Create(ProjectEntity entity) => new()
     {

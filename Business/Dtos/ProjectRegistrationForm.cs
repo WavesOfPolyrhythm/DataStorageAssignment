@@ -15,4 +15,17 @@ public class ProjectRegistrationForm
     [Required]
     [Column(TypeName = "date")]
     public DateTime EndDate { get; set; }
+    [Required]
+    public int EmployeeId { get; set; }
+    [Required]
+    public int CustomerId { get; set; }
+    [Required]
+    public int ServiceId { get; set; }
+    [Required]
+    public decimal TotalPrice { get; set; }
+    [Required]
+    public int StatusId { get; set; }
+    [Required]
+    public int Units { get; set; }
+
 }
