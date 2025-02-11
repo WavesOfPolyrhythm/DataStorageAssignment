@@ -14,10 +14,14 @@ public class ProjectService(IProjectRepository projectRepository) : IProjectServ
 
     public async Task<ProjectModel> CreateProjectAsync(ProjectRegistrationForm form)
     {
-        var entity = await _projectRepository.GetAsync(x => x.Title == form.Title);
-        entity ??= await _projectRepository.CreateAsync(ProjectFactory.Create(form));
+        var existingProject = await _projectRepository.GetAsync(x => x.Title == form.Title);
+        if (existingProject != null)
+            return null!;
 
-        return ProjectFactory.Create(entity);
+        var entity = await _projectRepository.CreateAsync(ProjectFactory.Create(form));
+        var project = ProjectFactory.Create(entity);
+
+        return project ?? null!;
     }
 
     public async Task<IEnumerable<ProjectModel>> GetAllProjectsAsync()

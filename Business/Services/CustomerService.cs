@@ -13,10 +13,13 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
 
     public async Task<CustomerModel> CreateCustomerAsync(CustomerRegistrationForm form)
     {
-        var entity = await _customerRepository.GetAsync(x => x.CustomerName == form.CustomerName);
-        entity ??= await _customerRepository.CreateAsync(CustomerFactory.Create(form));
+        var existingCustomer = await _customerRepository.GetAsync(x => x.CustomerName == form.CustomerName);
+        if (existingCustomer != null)
+            return null!;
 
-        return CustomerFactory.Create(entity);
+        var entity = await _customerRepository.CreateAsync(CustomerFactory.Create(form));
+        var customer = CustomerFactory.Create(entity);
+        return customer ?? null!;
     }
 
     public async Task<IEnumerable<CustomerModel>> GetAllCustomersAsync()

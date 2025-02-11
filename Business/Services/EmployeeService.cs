@@ -13,10 +13,14 @@ public class EmployeeService(IEmployeeRepository employeeRepository) : IEmployee
 
     public async Task<EmployeeModel> CreateEmployeeAsync(EmployeeRegistrationForm form)
     {
-        var entity = await _employeeRepository.GetAsync(x => x.Email == form.Email);
-        entity ??= await _employeeRepository.CreateAsync(EmployeeFactory.Create(form));
+        var existingEmployee = await _employeeRepository.GetAsync(x => x.Email == form.Email);
+        if (existingEmployee != null)
+            return null!;
 
-        return EmployeeFactory.Create(entity);
+        var entity = await _employeeRepository.CreateAsync(EmployeeFactory.Create(form));
+        var employee = EmployeeFactory.Create(entity);
+
+        return employee ?? null!;
     }
 
     public async Task<IEnumerable<EmployeeModel>> GetAllEmployeesAsync()
