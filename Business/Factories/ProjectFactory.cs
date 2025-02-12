@@ -18,7 +18,9 @@ public static class ProjectFactory
         EmployeeId = form.EmployeeId,
         TotalPrice = form.TotalPrice,
         CustomerId = form.CustomerId,
-};
+        ServiceId = form.ServiceId,
+        StatusId = form.StatusId
+    };
 
     public static ProjectModel Create(ProjectEntity entity) => new()
     {

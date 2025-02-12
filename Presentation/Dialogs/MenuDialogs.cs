@@ -19,6 +19,9 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             Console.Clear();
             Console.WriteLine("=== Main Menu ===");
             Console.WriteLine("1. Create Project");
+            Console.WriteLine("2. Create Customer");
+            Console.WriteLine("3. Create Employee");
+            Console.WriteLine("4. Create Customer Contact");
             Console.WriteLine("0. Exit");
 
             var choice = Console.ReadLine();
@@ -27,6 +30,15 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             {
                 case "1":
                     await CreateProjectDialog();
+                    break;
+                case "2":
+                    await CreateCustomerDialog();
+                    break;
+                case "3":
+                    await CreateEmployeeDialog();
+                    break;
+                case "4":
+                    await CreateCustomerContactDialog();
                     break;
                 case "0":
                     Console.WriteLine("Exiting the application...");
@@ -59,6 +71,7 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
         Console.Write("End Date (yyyy-MM-dd): ");
         form.EndDate = DateTime.Parse(Console.ReadLine()!);
 
+        /*
         // Skapa kund
         Console.WriteLine("\n-- Create a new customer --");
         var newCustomer = await CreateCustomerDialog();
@@ -68,9 +81,13 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             return;
         }
         form.CustomerId = newCustomer.Id;
+        */
 
         Console.Write("Enter Employee ID (Project Manager): ");
         form.EmployeeId = int.Parse(Console.ReadLine()!);
+
+        Console.Write("Enter a Customer ID: ");
+        form.CustomerId = int.Parse(Console.ReadLine()!);
 
         Console.Write("Enter Service ID: ");
         form.ServiceId = int.Parse(Console.ReadLine()!);
@@ -125,5 +142,92 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             return null;
         }
     }
+
+    public async Task<EmployeeModel?> CreateEmployeeDialog()
+    {
+        var form = new EmployeeRegistrationForm();
+        Console.Clear();
+        Console.WriteLine("--- Creating New Employee ---");
+
+        Console.Write("Name: ");
+        form.Name = Console.ReadLine()!;
+
+        Console.Write("Email: ");
+        form.Email = Console.ReadLine()!;
+   
+        Console.WriteLine("\nAvailable Roles:");
+        Console.WriteLine("1 - Project Manager");
+        Console.Write("\nEnter Role Id: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int roleId))
+        {
+            Console.WriteLine("Invalid input. Returning to menu.");
+            return null;
+        }
+        form.RoleId = roleId;
+
+        var result = await _employeeService.CreateEmployeeAsync(form);
+
+        if (result != null)
+        {
+            Console.WriteLine($"\n Employee created successfully with Id: {result.Id}");
+            Console.WriteLine($"Name: {result.Name} | Email: {result.Email}");
+            return result;
+        }
+        else
+        {
+            Console.WriteLine("\n Failed to create Employee. Email may already exist.");
+            return null;
+        }
+    }
+
+    public async Task<CustomerContactModel?> CreateCustomerContactDialog()
+    {
+        var form = new CustomerContactRegistrationForm();
+        Console.Clear();
+        Console.WriteLine("--- Creating New Customer Contact ---");
+
+        var customers = await _customerService.GetAllCustomersAsync();
+
+        Console.WriteLine("\nAvailable Customers:");
+        foreach (var customer in customers)
+        {
+            Console.WriteLine($"Id: {customer.Id} | Name: {customer.CustomerName}");
+        }
+
+        Console.Write("\nEnter Customer Id: ");
+        if (!int.TryParse(Console.ReadLine(), out int customerId))
+        {
+            Console.WriteLine("Invalid input. Returning to menu.");
+            return null;
+        }
+
+        form.CustomerId = customerId;
+
+        Console.Write("Name: ");
+        form.Name = Console.ReadLine()!;
+
+        Console.Write("Phone Number: ");
+        form.PhoneNumber = Console.ReadLine()!;
+
+        Console.Write("Email: ");
+        form.Email = Console.ReadLine()!;
+
+        var result = await _customerContactService.CreateCustomerContactAsync(form);
+
+        if (result != null)
+        {
+            Console.WriteLine($"\n Customer Contact created successfully with Id: {result.Id}");
+            Console.WriteLine($"Name: {result.Name} | Email: {result.Email} | Customer ID: {result.CustomerId}");
+            return result;
+        }
+        else
+        {
+            Console.WriteLine("\n Failed to create Customer Contact.");
+            return null;
+        }
+    }
+
+
 
 }

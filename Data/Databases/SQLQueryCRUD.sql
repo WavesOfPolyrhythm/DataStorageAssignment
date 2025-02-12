@@ -37,6 +37,23 @@ JOIN Customers c ON p.CustomerId = c.Id
 JOIN Employees e ON p.EmployeeId = e.Id
 LEFT JOIN CustomerContacts cc ON c.Id = cc.CustomerId;
 */
+--DELETE FROM Customers WHERE Id = 12;
 
+/*
+SELECT 
+    CONCAT('P-', p.Id) AS 'ProjectId',
+    p.Title,
+    p.Description,
+    p.StartDate,
+    p.EndDate,
+    s.StatusName AS 'CurrentStatus',
+    c.CustomerName,
+    CONCAT(e.Name, ' (', e.Email, ')') AS 'ProjectManager',
+    CONCAT(cc.Name, ' (', cc.Email, ')') AS 'CustomerContact'
+FROM Projects p
+JOIN Status s ON p.StatusId = s.Id
+JOIN Customers c ON p.CustomerId = c.Id
+JOIN Employees e ON p.EmployeeId = e.Id
+LEFT JOIN CustomerContacts cc ON c.Id = cc.CustomerId
+WHERE p.Id = 19; */
 
-DELETE FROM Customers WHERE Id = 9;
