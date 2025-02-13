@@ -22,6 +22,7 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             Console.WriteLine("2. Create Customer");
             Console.WriteLine("3. Create Employee");
             Console.WriteLine("4. Create Customer Contact");
+            Console.WriteLine("5. Show all projects");
             Console.WriteLine("0. Exit");
 
             var choice = Console.ReadLine();
@@ -39,6 +40,9 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
                     break;
                 case "4":
                     await CreateCustomerContactDialog();
+                    break;
+                case "5":
+                    await ShowAllProjectsDialog();
                     break;
                 case "0":
                     Console.WriteLine("Exiting the application...");
@@ -115,8 +119,6 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             Console.WriteLine("\n Failed to create project.");
         }
 
-        Console.WriteLine("\nPress any key to return to the menu...");
-        Console.ReadKey();
     }
 
     public async Task<CustomerModel?> CreateCustomerDialog()
@@ -226,6 +228,27 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             Console.WriteLine("\n Failed to create Customer Contact.");
             return null;
         }
+    }
+
+    public async Task ShowAllProjectsDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("=== All Projects ===");
+
+        var projects = await _projectService.GetAllProjectsAsync();
+
+        foreach (var project in projects)
+        {
+            Console.WriteLine($"\nProject ID: P-{project.Id}");
+            Console.WriteLine($"Title: {project.Title}");
+            Console.WriteLine($"Manager: {project.ProjectManager} - {project.Role}");
+            Console.WriteLine($"Start: {project.StartDate:yyyy-MM-dd} | End: {project.EndDate:yyyy-MM-dd}");
+            Console.WriteLine($"Customer: {project.CustomerName}");
+            Console.WriteLine($"Customer Contact: {project.CustomerContact}");
+            Console.WriteLine($"Status: {project.StatusName}");
+            Console.WriteLine("----------------------------------------");
+        }
+
     }
 
 

@@ -14,8 +14,9 @@ public class ProjectRepository(DataContext context) : BaseRepository<ProjectEnti
         return await _context.Projects
             .Include(p => p.Status)
             .Include(p => p.Customer)
-            .ThenInclude(c => c.CustomerContacts)
-            .Include(p => p.Employee) 
+                .ThenInclude(c => c.CustomerContacts)
+            .Include(p => p.Employee)
+                .ThenInclude(e => e.Role)
             .ToListAsync();
     }
 }

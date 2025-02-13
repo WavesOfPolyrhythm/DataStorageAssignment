@@ -57,3 +57,4 @@ JOIN Employees e ON p.EmployeeId = e.Id
 LEFT JOIN CustomerContacts cc ON c.Id = cc.CustomerId
 WHERE p.Id = 19; */
 
+DELETE FROM Employees WHERE Id = 6;

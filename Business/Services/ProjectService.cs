@@ -12,6 +12,8 @@ namespace Business.Services;
 public class ProjectService(IProjectRepository projectRepository, ICustomerRepository customerRepository) : IProjectService
 {
     private readonly IProjectRepository _projectRepository = projectRepository;
+
+    //Anropa CustomerService här senare som sen går till customerRepository
     private readonly ICustomerRepository _customerRepository = customerRepository;
 
     public async Task<ProjectModel> CreateProjectAsync(ProjectRegistrationForm form)
@@ -20,7 +22,7 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
         if (existingProject != null)
             return null!;
 
-        // Hämta befintlig kund från databasen istället för att skapa en ny
+        //Samma här, anropa service istället
         var customer = await _customerRepository.GetAsync(x => x.Id == form.CustomerId);
         if (customer == null)
         {
