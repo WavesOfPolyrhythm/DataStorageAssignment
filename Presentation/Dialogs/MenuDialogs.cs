@@ -6,12 +6,16 @@ using Presentation.Interfaces;
 
 namespace Presentation.Dialogs;
 
-public class MenuDialogs(IProjectService projectService, ICustomerContactService customerContactService, IEmployeeService employeeService, ICustomerService customerService) : IMenuDialogs
+public class MenuDialogs(IProjectService projectService, IUnitService unitService, IRoleService roleService, IStatusService statusService, IServicesService servicesService, ICustomerService customerService, IEmployeeService employeeService, ICustomerContactDialogs customerContactDialogs) : IMenuDialogs
 {
     private readonly IProjectService _projectService = projectService;
-    private readonly ICustomerContactService _customerContactService = customerContactService;
-    private readonly IEmployeeService _employeeService = employeeService;
+    private readonly IUnitService _unitService = unitService;
+    private readonly IRoleService _roleService = roleService;
+    private readonly IStatusService _statusService = statusService;
+    private readonly IServicesService _servicesService = servicesService;
     private readonly ICustomerService _customerService = customerService;
+    private readonly IEmployeeService _employeeService = employeeService;
+    private readonly ICustomerContactDialogs _customerContactDialogs = customerContactDialogs;
 
     public async Task MenuOptions()
     {
@@ -34,34 +38,43 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             {
                 case "1":
                     Console.Clear();
-                    Console.WriteLine("Manage Projects...");
+                    var projectDialogs = new ProjectDialogs(_projectService);
+                    await projectDialogs.MenuOptions();
                     break;
                 case "2":
                     Console.Clear();
-                    Console.WriteLine("Manage Customers...");
+                    var customerDialogs = new CustomerDialogs(_customerService, _customerContactDialogs);
+                    await customerDialogs.MenuOptions();
                     break;
                 case "3":
                     Console.Clear();
-                    Console.WriteLine("Manage Employees..");
+                    var employeeDialogs = new EmployeeDialogs(_employeeService);
+                    await employeeDialogs.MenuOptions();
                     break;
                 case "4":
                     Console.Clear();
-                    Console.WriteLine("Mange Roles");
+                    var roleDialogs = new RoleDialogs(_roleService);
+                    await roleDialogs.MenuOptions();
                     break;
                 case "5":
                     Console.Clear();
-                    Console.WriteLine("Manage Services");
+                    Console.Clear();
+                    var serviceDialogs = new ServiceDialogs(_servicesService);
+                    await serviceDialogs.MenuOptions();
                     break;
                 case "6":
                     Console.Clear();
-                    Console.WriteLine("Manage Status...");
+                    var statusDialogs = new StatusDialogs(_statusService);
+                    await statusDialogs.MenuOptions();
                     break;
                 case "7":
                     Console.Clear();
-                    Console.WriteLine("Manage Units");
+                    var unitDialogs = new UnitDialogs(_unitService);
+                    await unitDialogs.MenuOptions();
                     break;
                 case "0":
-                    Console.WriteLine("Exiting the application...");
+                    Console.WriteLine("\nExiting the application...");
+                    Console.ReadKey();
                     return;
                 default:
                     Console.WriteLine("Invalid choice. Please try again.");
@@ -70,7 +83,7 @@ public class MenuDialogs(IProjectService projectService, ICustomerContactService
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
         }
-
+        
     }
 
 }

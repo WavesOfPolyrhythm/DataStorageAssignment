@@ -36,6 +36,14 @@ serviceCollection.AddScoped<IUnitService, UnitService>();
 
 //Menu
 serviceCollection.AddScoped<IMenuDialogs, MenuDialogs>();
+serviceCollection.AddScoped<IUnitDialogs, UnitDialogs>();
+serviceCollection.AddScoped<IRoleDialogs, RoleDialogs>();
+serviceCollection.AddScoped<IStatusDialogs, StatusDialogs>();
+serviceCollection.AddScoped<IServiceDialogs,  ServiceDialogs>();
+serviceCollection.AddScoped<ICustomerDialogs, CustomerDialogs>();
+serviceCollection.AddScoped<IEmployeeDialogs, EmployeeDialogs>();
+serviceCollection.AddScoped<IProjectDialogs, ProjectDialogs>();
+serviceCollection.AddScoped<ICustomerContactDialogs, CustomerContactDialogs>();
 
 
 var serviceProvider = serviceCollection.BuildServiceProvider();
