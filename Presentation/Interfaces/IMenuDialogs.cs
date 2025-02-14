@@ -1,4 +1,4 @@
-﻿namespace Presentation.Dialogs;
+﻿namespace Presentation.Interfaces;
 
 public interface IMenuDialogs
 {

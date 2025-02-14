@@ -7,6 +7,7 @@ using Business.Services;
 using Business.Interfaces;
 using Business.Dtos;
 using Presentation.Dialogs;
+using Presentation.Interfaces;
 
 var serviceCollection = new ServiceCollection();
 
@@ -17,6 +18,10 @@ serviceCollection.AddScoped<IProjectRepository, ProjectRepository>();
 serviceCollection.AddScoped<ICustomerRepository, CustomerRepository>();
 serviceCollection.AddScoped<IEmployeeRepository, EmployeeRepository>();
 serviceCollection.AddScoped<ICustomerContactRepository, CustomerContactRepository>();
+serviceCollection.AddScoped<IRolesRepository, RolesRepository>();
+serviceCollection.AddScoped<IServiceRepository, ServiceRepository>();
+serviceCollection.AddScoped<IStatusRepository, StatusRepository>();
+serviceCollection.AddScoped<IUnitRepository, UnitRepository>();
 
 
 //Service
@@ -24,6 +29,10 @@ serviceCollection.AddScoped<IProjectService, ProjectService>();
 serviceCollection.AddScoped<IEmployeeService, EmployeeService>();
 serviceCollection.AddScoped<ICustomerService, CustomerService>();
 serviceCollection.AddScoped<ICustomerContactService, CustomerContactService>();
+serviceCollection.AddScoped<IRoleService, RoleService>();
+serviceCollection.AddScoped<IServicesService, ServicesService>();
+serviceCollection.AddScoped<IStatusService, StatusService>();
+serviceCollection.AddScoped<IUnitService, UnitService>();
 
 //Menu
 serviceCollection.AddScoped<IMenuDialogs, MenuDialogs>();
