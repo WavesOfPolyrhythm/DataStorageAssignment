@@ -2,7 +2,10 @@
 using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
+using Data.Entities;
 using Data.Interfaces;
+using Data.Repositories;
+using System.Linq.Expressions;
 
 namespace Business.Services;
 
@@ -27,5 +30,38 @@ public class StatusService(IStatusRepository statusRepository) : IStatusService
     {
         var entities = await _statusRepository.GetAllAsync();
         return entities.Select(StatusFactory.Create);
+    }
+
+    public async Task<StatusEntity?> GetStatusEntityAsync(Expression<Func<StatusEntity, bool>> expression)
+    {
+        var status = await _statusRepository.GetAsync(expression);
+        return status;
+    }
+
+    public async Task<StatusModel?> UpdateStatusAsync(StatusUpdateForm form)
+    {
+        try
+        {
+            var existingEntity = await GetStatusEntityAsync(x => x.Id == form.Id);
+
+            if (existingEntity == null)
+                return null!;
+
+            existingEntity.StatusName = string.IsNullOrWhiteSpace(form.StatusName) ? existingEntity.StatusName : form.StatusName;
+
+            var updatedEntity = await _statusRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
+            return StatusFactory.Create(existingEntity);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return null;
+        }
+    }
+
+    public async Task<bool> DeleteStatusAsync(int id)
+    {
+        var result = await _statusRepository.DeleteAsync(x => x.Id == id);
+        return result;
     }
 }

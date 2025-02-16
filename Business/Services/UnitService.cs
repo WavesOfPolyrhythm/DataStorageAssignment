@@ -2,7 +2,9 @@
 using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
+using Data.Entities;
 using Data.Interfaces;
+using System.Linq.Expressions;
 
 namespace Business.Services;
 
@@ -27,5 +29,40 @@ public class UnitService(IUnitRepository unitRepository) : IUnitService
     {
         var entities = await _unitRepository.GetAllAsync();
         return entities.Select(UnitFactory.Create);
+    }
+
+    public async Task<UnitEntity?> GetUnitEntityAsync(Expression<Func<UnitEntity, bool>> expression)
+    {
+        var unit = await _unitRepository.GetAsync(expression);
+        return unit;
+    }
+
+    public async Task<UnitModel?> UpdateUnitAsync(UnitUpdateForm form)
+    {
+        try
+        {
+            var existingEntity = await GetUnitEntityAsync(x => x.Id == form.Id);
+
+            if (existingEntity == null)
+                return null!;
+
+            existingEntity.Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name;
+            existingEntity.Description = string.IsNullOrWhiteSpace(form.Description) ? existingEntity.Description : form.Description;
+
+            var updatedEntity = await _unitRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
+            return UnitFactory.Create(existingEntity);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return null;
+        }
+
+    }
+
+    public async Task<bool> DeleteUnitAsync(int id)
+    {
+        var result = await _unitRepository.DeleteAsync(x => x.Id == id);
+        return result;
     }
 }

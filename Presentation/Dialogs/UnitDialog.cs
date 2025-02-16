@@ -1,4 +1,6 @@
-﻿using Business.Interfaces;
+﻿using Business.Dtos;
+using Business.Interfaces;
+using Business.Models;
 using Presentation.Interfaces;
 
 namespace Presentation.Dialogs;
@@ -19,25 +21,22 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
             Console.WriteLine("4. Delete Unit");
             Console.WriteLine("0. Back to Main Menu");
 
+            Console.Write("Select a number of choice: \n");
             var choice = Console.ReadLine();
 
             switch (choice)
             {
                 case "1":
-                    Console.Clear();
-                    Console.WriteLine("Creates Unit...");
+                    await CreateUnitDialog();
                     break;
                 case "2":
-                    Console.Clear();
-                    Console.WriteLine("View Unit...");
+                    await ShowAllUnitsDialog();
                     break;
                 case "3":
-                    Console.Clear();
-                    Console.WriteLine("Update all Units...");
+                    await UpdateUnitDialog();
                     break;
                 case "4":
-                    Console.Clear();
-                    Console.WriteLine("Delete Unit...");
+                    await DeleteUnitDialog();
                     break;
                 case "0":
                     Console.Clear();
@@ -52,4 +51,114 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
             Console.ReadKey();
         }
     }
+
+    public async Task CreateUnitDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("--Creating new Unit--");
+
+        var form = new UnitRegistrationForm();
+        Console.Write("Unit-Title: ");
+        form.Name = Console.ReadLine()!;
+        Console.Write("Unit Description: ");
+        form.Description = Console.ReadLine()!;
+
+        var result = await _unitService.CreateUnitsAsync(form);
+
+        if (result != null)
+        {
+            Console.WriteLine($"Unit was created with values: {result.Name} - {result.Description}");
+        }
+        else
+        {
+            Console.WriteLine("Failed to create Unit.");
+        }
+    }
+
+    public async Task ShowAllUnitsDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("--All Units--");
+        Console.WriteLine();
+        var units = await _unitService.GetAllUnitsAsync();
+        if(units != null)
+        foreach (var unit in units)
+        {
+            Console.WriteLine($"-{unit.Name}");
+            Console.WriteLine($"Description: {unit.Description}");
+            Console.WriteLine("-------------------------------");
+        }
+        else
+        {
+            Console.WriteLine("There are no available Units right now.");
+        }
+    }
+
+    public async Task UpdateUnitDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("--Update Unit--");
+        Console.WriteLine("Enter the Unit-Id you want to update below:  ");
+        var units = await _unitService.GetAllUnitsAsync();
+        foreach(var unit in units)
+        {
+            Console.WriteLine($"{unit.Id}. {unit.Name}");
+        }
+        if (!int.TryParse(Console.ReadLine(), out var unitId))
+        {
+            Console.WriteLine("Invalid ID.");
+            return;
+        }
+
+        Console.Write("New Unit Name (leave blank to keep current): ");
+        var unitName = Console.ReadLine();
+        Console.Write("New Description (leave blank to keep current): ");
+        var description = Console.ReadLine();
+
+        var updateForm = new UnitUpdateForm
+        {
+            Id = unitId,
+            Name = string.IsNullOrWhiteSpace(unitName) ? null! : unitName,
+            Description = string.IsNullOrWhiteSpace(description) ? null! : description,
+        };
+
+        var result = await _unitService.UpdateUnitAsync(updateForm);
+        if (result != null)
+        {
+            Console.WriteLine($"Unit was successfully updated to: {result.Name}, {result.Description}. ");
+        }
+        else
+        {
+            Console.WriteLine("Failed to update unit.");
+        }
+    }
+
+    public async Task DeleteUnitDialog()
+    {
+        Console.Clear(); 
+        Console.WriteLine("--Remove unit--");
+        Console.WriteLine("Enter the Unit-Id you want to remove below:  ");
+        var units = await _unitService.GetAllUnitsAsync();
+        foreach (var unit in units)
+        {
+            Console.WriteLine($"{unit.Id}. {unit.Name}");
+        }
+        if (!int.TryParse(Console.ReadLine(), out var unitId))
+        {
+            Console.WriteLine("Invalid ID.");
+            return;
+        }
+
+        var result = await _unitService.DeleteUnitAsync(unitId);
+
+        if (result != false)
+        {
+            Console.WriteLine($"Unit was successfully removed.");
+        }
+        else
+        {
+            Console.WriteLine("Failed to remove unit.");
+        }
+    }
 }
+

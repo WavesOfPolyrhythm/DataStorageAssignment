@@ -22,7 +22,7 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("=== Main Menu ===");
+            Console.WriteLine("=== MAIN MENU ===\n");
             Console.WriteLine("1. Manage Projects");
             Console.WriteLine("2. Manage Customers");
             Console.WriteLine("3. Manage Employees");
@@ -30,8 +30,9 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
             Console.WriteLine("5. Manage Services");
             Console.WriteLine("6. Manage Status");
             Console.WriteLine("7. Manage Units");
-            Console.WriteLine("0. Exit");
+            Console.WriteLine("\n0. Exit");
 
+            Console.Write("\nSelect a number of choice: ");
             var choice = Console.ReadLine();
 
             switch (choice)
@@ -77,7 +78,7 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
                     Console.ReadKey();
                     return;
                 default:
-                    Console.WriteLine("Invalid choice. Please try again.");
+                    Console.WriteLine("\nInvalid choice. Please try again.");
                     break;
             }
             Console.WriteLine("\nPress any key to return to the menu...");
