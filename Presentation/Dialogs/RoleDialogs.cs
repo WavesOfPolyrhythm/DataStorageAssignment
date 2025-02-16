@@ -1,6 +1,7 @@
 ﻿using Business.Dtos;
 using Business.Interfaces;
 using Business.Models;
+using Business.Services;
 using Presentation.Interfaces;
 
 namespace Presentation.Dialogs;
@@ -33,12 +34,10 @@ public class RoleDialogs(IRoleService roleService) : IRoleDialogs
                     await ViewAllRolesDialog();
                     break;
                 case "3":
-                    Console.Clear();
-                    Console.WriteLine("Update Role...");
+                    await UpdateRoleAsync();
                     break;
                 case "4":
-                    Console.Clear();
-                    Console.WriteLine("Delete Role...");
+                    await DeleteRoleasync();
                     break;
                 case "0":
                     Console.Clear();
@@ -90,6 +89,91 @@ public class RoleDialogs(IRoleService roleService) : IRoleDialogs
         else
         {
             Console.WriteLine("\nNo Roles available right now.");
+        }
+    }
+
+    public async Task UpdateRoleAsync()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--UPDATE ROLE MENU--");
+        Console.WriteLine("\nCurrently available Roles: \n");
+
+        var roles = await _roleService.GetAllRolesAsync();
+        if (roles.Any())
+        {
+            foreach(var role in roles)
+            {
+                Console.WriteLine($"{role.Id}. {role.RoleName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Roles available right now.");
+            return;
+        }
+
+        Console.Write("\nEnter the Role Id you want to update: ");
+
+        if (!int.TryParse(Console.ReadLine(), out var roleId))
+        {
+            Console.Clear();
+            Console.WriteLine("Invalid ID. Returning to Status menu...");
+            return;
+        }
+
+        Console.Write("\nName of the Role - (leave blank to keep current): ");
+        var roleName = Console.ReadLine()!;
+        var updateRoleName = new RolesUpdateForm
+        {
+            Id = roleId,
+            RoleName = string.IsNullOrWhiteSpace(roleName) ? null! : roleName,
+        };
+
+        var result = await _roleService.UpdateRolesAsync(updateRoleName);
+        if(result != null)
+        {
+            Console.WriteLine($"\nRole was successfully updated to: '{result.RoleName}'");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to update Role.");
+        }
+    }
+
+    public async Task DeleteRoleasync()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--REMOVE ROLES MENU--\n");
+        var roles = await _roleService.GetAllRolesAsync();
+        if (roles.Any())
+        {
+            foreach (var role in roles)
+            {
+                Console.WriteLine($"{role.Id}. {role.RoleName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Roles available right now.");
+            return;
+        }
+
+        Console.Write("\nEnter Id of the Role you want to remove: ");
+        if (!int.TryParse(Console.ReadLine(), out var roleId))
+        {
+            Console.Clear();
+            Console.WriteLine("\nInvalid ID. Returning to Role menu...");
+            return;
+        }
+
+        var result = await _roleService.DeleteRoleAsync(roleId);
+        if (result != false)
+        {
+            Console.WriteLine("\nRole was successfully removed.");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to remove Role.");
         }
     }
    

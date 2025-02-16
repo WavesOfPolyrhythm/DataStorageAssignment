@@ -94,7 +94,7 @@ public class StatusDialogs(IStatusService statusService) : IStatusDialogs
     {
         Console.Clear();
         Console.WriteLine("\n--UPDATE STATUS MENU--\n");
-        Console.WriteLine("\nCurrently available Statuses below: \n");
+        Console.WriteLine("\nCurrently available Statuses: \n");
 
         var statuses = await _statusService.GetAllStatusesAsync();
         if (statuses != null)
@@ -149,11 +149,12 @@ public class StatusDialogs(IStatusService statusService) : IStatusDialogs
         {
             Console.WriteLine("There are no statuses available right now.");
         }
+
         Console.Write("\nEnter Id of the Status you want to remove: ");
         if (!int.TryParse(Console.ReadLine(), out var statusId))
         {
             Console.Clear();
-            Console.WriteLine("Invalid ID. Returning to Status menu...");
+            Console.WriteLine("\nInvalid ID. Returning to Status menu...");
             return;
         }
 
