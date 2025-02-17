@@ -10,5 +10,7 @@ public class ServicesUpdateForm
     [Required]
     public string Name { get; set; } = null!;
     [Required]
-    public decimal Price { get; set; }
+    public decimal? Price { get; set; }
+
+    public int UnitId { get; set; }
 }

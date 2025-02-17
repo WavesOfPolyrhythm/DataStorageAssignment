@@ -1,6 +1,7 @@
 ﻿using Business.Dtos;
 using Business.Interfaces;
 using Presentation.Interfaces;
+using System;
 
 namespace Presentation.Dialogs;
 
@@ -32,12 +33,10 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
                     await ViewAllServicesDialog();
                     break;
                 case "3":
-                    Console.Clear();
-                    Console.WriteLine("Update Service...");
+                    await UpdateServiceDialog();
                     break;
                 case "4":
-                    Console.Clear();
-                    Console.WriteLine("Delete Service...");
+                    await DeleteServiceDialog();
                     break;
                 case "0":
                     Console.Clear();
@@ -105,9 +104,9 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
         Console.WriteLine("\n--ALL SERVICES--\n");
 
         var services = await _servicesService.GetAllServicesAsync();
-        if (services != null)
+        if (services.Any())
         {
-           foreach (var service in services)
+            foreach (var service in services)
             {
                 Console.WriteLine($"{service.Id}. {service.Name} - Price: {service.Price} / {service.UnitName}");
             }
@@ -117,4 +116,92 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
             Console.WriteLine("\nNo available services.");
         }
     }
+
+    public async Task UpdateServiceDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--UPDATE SERVICE--\n");
+        var services = await _servicesService.GetAllServicesAsync();
+        if(services.Any())
+        {
+            foreach (var service in services)
+            {
+                Console.WriteLine($"{service.Id}. {service.Name}");
+
+            }
+        }
+        else
+        {
+            Console.WriteLine("No Services available.");
+        }
+
+        Console.Write("\nEnter Id of Service you want to update: ");
+        if (!int.TryParse(Console.ReadLine(), out var serviceId))
+        {
+            Console.Clear();
+            Console.WriteLine("Invalid ID. Returning to Service menu...");
+            return;
+        }
+        Console.Write("\nName of the Role - (leave blank to keep current): ");
+        var serviceName = Console.ReadLine()!;
+        Console.Write("\nEnter Price of Service - (leave blank to keep current): ");
+        var servicePrice = decimal.Parse(Console.ReadLine()!);
+     
+        var updateService = new ServicesUpdateForm
+        {
+            Id = serviceId,
+            Name = serviceName,
+            Price = servicePrice,
+        };
+
+        var result = await _servicesService.UpdateServiceAsync(updateService);
+        if(result != null)
+        {
+            Console.WriteLine($"\nService was successfully updated to: {result.Name} - {result.Price} / {result.UnitName}");
+        }
+        else
+        {
+            Console.WriteLine("Failed to update Service.");
+        }
+    }
+
+    public async Task DeleteServiceDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--REMOVE SERVICE--\n");
+        var services = await _servicesService.GetAllServicesAsync();
+        if(services.Any())
+        {
+            foreach (var service in services)
+            {
+                Console.WriteLine($"{service.Id}. {service.Name}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("No available Services. Returning to the menu.");
+            return;
+        }
+
+        Console.Write("\nEnter Id of Service you want to remove: ");
+        if (!int.TryParse(Console.ReadLine(), out var serviceId))
+        {
+            Console.Clear();
+            Console.WriteLine("\nInvalid ID. Returning to Service menu...");
+            return;
+        }
+
+        var result = await _servicesService.DeleteServiceAsync(serviceId);
+
+        if(result)
+        {
+            Console.WriteLine($"\nSuccessfully removed Service.");
+        }
+        else
+        {
+            Console.WriteLine("Failed to remove service.");
+        }
+
+    }
+
 }
