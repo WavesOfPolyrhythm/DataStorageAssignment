@@ -10,4 +10,6 @@ public class EmployeeUpdateForm
     public string Name { get; set; } = null!;
     [Required]
     public string Email { get; set; } = null!;
+    [Required]
+    public int RoleId { get; set; }
 }

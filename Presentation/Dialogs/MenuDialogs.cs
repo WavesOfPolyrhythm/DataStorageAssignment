@@ -49,7 +49,7 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
                     break;
                 case "3":
                     Console.Clear();
-                    var employeeDialogs = new EmployeeDialogs(_employeeService);
+                    var employeeDialogs = new EmployeeDialogs(_employeeService, _roleService);
                     await employeeDialogs.MenuOptions();
                     break;
                 case "4":

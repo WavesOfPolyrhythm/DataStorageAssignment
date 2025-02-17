@@ -1,11 +1,13 @@
-﻿using Business.Interfaces;
+﻿using Business.Dtos;
+using Business.Interfaces;
 using Presentation.Interfaces;
 
 namespace Presentation.Dialogs;
 
-public class EmployeeDialogs(IEmployeeService employeeService) : IEmployeeDialogs
+public class EmployeeDialogs(IEmployeeService employeeService, IRoleService roleService) : IEmployeeDialogs
 {
     private readonly IEmployeeService _employeeService = employeeService;
+    private readonly IRoleService _roleService = roleService;
 
     public async Task MenuOptions()
     {
@@ -24,20 +26,16 @@ public class EmployeeDialogs(IEmployeeService employeeService) : IEmployeeDialog
             switch (choice)
             {
                 case "1":
-                    Console.Clear();
-                    Console.WriteLine("Adding Employee...");
+                    await CreateEmployeeDialog();
                     break;
                 case "2":
-                    Console.Clear();
-                    Console.WriteLine("View Employees...");
+                    await ViewAllEmployees();
                     break;
                 case "3":
-                    Console.Clear();
-                    Console.WriteLine("Update Employee...");
+                    await UpdateEmployeeDialog();
                     break;
                 case "4":
-                    Console.Clear();
-                    Console.WriteLine("Remove Employee...");
+                    await DeleteEmployeeDialog();
                     break;
                 case "0":
                     Console.Clear();
@@ -50,6 +48,184 @@ public class EmployeeDialogs(IEmployeeService employeeService) : IEmployeeDialog
             }
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
+        }
+    }
+
+    public async Task CreateEmployeeDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--ADD EMPLOYEE--\n");
+        var form = new EmployeeRegistrationForm();
+        Console.Write("Enter first and last Name of Employee: ");
+        form.Name = Console.ReadLine()!;
+        Console.Write("\nEnter Email of Employee: ");
+        form.Email = Console.ReadLine()!;
+        Console.WriteLine("\nSelect a Role for the Employee.\n");
+        var roles = await _roleService.GetAllRolesAsync();
+        if (roles != null)
+        {
+            foreach (var role in roles)
+            {
+                Console.WriteLine($"{role.Id}. {role.RoleName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("No Roles found, please add Roles in Role menu to continue.");
+            return;
+        }
+        Console.Write("\nEnter Role ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int roleId))
+        {
+            Console.WriteLine("\nInvalid Unit Id. Returning to menu...");
+            return;
+        }
+
+        form.RoleId = roleId;
+
+        var result = await _employeeService.CreateEmployeeAsync(form);
+        if (result != null)
+        {
+            Console.WriteLine($"\nEmployee was successfully added: {result.RoleName} - {result.Name} [ {result.Email} ]");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to add Employee.");
+        }
+    }
+
+    public async Task ViewAllEmployees()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--ALL EMPLOYEES--\n");
+        var employees = await _employeeService.GetAllEmployeesAsync();
+        if (employees != null)
+        {
+            foreach (var employee in employees)
+            {
+                Console.WriteLine($"{employee.Id}. -{employee.RoleName}- {employee.Name} [ {employee.Email} ]");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"No Employees available right now.");
+        }
+
+    }
+    public async Task UpdateEmployeeDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--UPDATE EMPLOYEE INFORMATION--\n");
+        var employees = await _employeeService.GetAllEmployeesAsync();
+        if (employees != null)
+        {
+            foreach (var employee in employees)
+            {
+                Console.WriteLine($"{employee.Id}. -{employee.RoleName}- {employee.Name} [ {employee.Email} ]");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"\nNo Employees available right now.");
+        }
+
+        Console.Write("\nEnter Id of Employee you want to update: ");
+
+        if (!int.TryParse(Console.ReadLine(), out var employeeId))
+        {
+            Console.Clear();
+            Console.WriteLine("\nInvalid ID. Returning to Service menu...");
+            return;
+        }
+
+        Console.Write("\nEnter first and last name of Employee - (leave blank to keep current): ");
+        var employeeName = Console.ReadLine()!;
+        Console.Write("\nEnter Email of Employee - (leave blank to keep current): ");
+        var employeeEmail = Console.ReadLine()!;
+
+        var updateEmployee = new EmployeeUpdateForm
+        {
+            Id = employeeId,
+            Name = employeeName,
+            Email = employeeEmail
+        };
+
+        Console.WriteLine("\n--Available Roles--\n");
+        var roles = await _roleService.GetAllRolesAsync();
+        if (roles != null)
+        {
+            foreach (var role in roles)
+            {
+                Console.WriteLine($"{role.Id}. {role.RoleName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Roles found, please add Roles in Role menu to continue with this action.");
+            return;
+        }
+
+        /// <summary>
+        /// Chat GPT helped with generating a while loop, ensuring user can have unlimited retrys selecting a role,
+        /// for the updated Employee. Loop continues until a valid roleId is provided, at which point it breaks.
+        /// </summary>
+        int roleId;
+        while(true)
+        {
+            Console.Write("\nEnter Role ID for the updated Employee: ");
+            if (int.TryParse(Console.ReadLine(), out roleId) && roles.Any(r => r.Id == roleId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Role Id. Try again!");
+        }
+
+        updateEmployee.RoleId = roleId;
+
+        var result = await _employeeService.UpdateEmployeeAsync(updateEmployee);
+
+        if(result != null)
+        {
+            Console.WriteLine($"\nSuccessfully updated Employee: -{result.RoleName}- {result.Name} [ {result.Email} ]");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to update Employee information.");
+        }
+    }
+
+    public async Task DeleteEmployeeDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--REMOVE EMPLOYEE--\n");
+        var employees = await _employeeService.GetAllEmployeesAsync();
+        if(employees != null)
+        {
+            foreach(var employee in employees)
+            {
+                Console.WriteLine($"{employee.Id}. -{employee.RoleName}- {employee.Name} [ {employee.Email} ]");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Employees available right now.");
+        }
+
+        Console.Write("\nEnter Id of Employee you want to remove: ");
+        if (!int.TryParse(Console.ReadLine(), out int employeeId))
+        {
+            Console.WriteLine("\nInvalid Employee Id. Returning to menu...");
+            return;
+        }
+
+        var result = await _employeeService.DeleteEmployeeAsync(employeeId);
+        if(result)
+        {
+            Console.WriteLine("\nSuccessfully Removed Employee.");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to remove Employee.");
         }
     }
 }

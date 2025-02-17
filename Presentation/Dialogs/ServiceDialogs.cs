@@ -139,7 +139,7 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
         if (!int.TryParse(Console.ReadLine(), out var serviceId))
         {
             Console.Clear();
-            Console.WriteLine("Invalid ID. Returning to Service menu...");
+            Console.WriteLine("\nInvalid ID. Returning to Service menu...");
             return;
         }
         Console.Write("\nName of the Role - (leave blank to keep current): ");
@@ -161,7 +161,7 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
         }
         else
         {
-            Console.WriteLine("Failed to update Service.");
+            Console.WriteLine("\nFailed to update Service.");
         }
     }
 
