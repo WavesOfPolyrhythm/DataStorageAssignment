@@ -8,4 +8,5 @@ public class ServicesRegistrationForm
     public string Name { get; set; } = null!;
     [Required]
     public decimal Price { get; set; }
+    public int UnitId { get; set; }
 }

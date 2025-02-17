@@ -60,7 +60,7 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
                 case "5":
                     Console.Clear();
                     Console.Clear();
-                    var serviceDialogs = new ServiceDialogs(_servicesService);
+                    var serviceDialogs = new ServiceDialogs(_servicesService, _unitService);
                     await serviceDialogs.MenuOptions();
                     break;
                 case "6":

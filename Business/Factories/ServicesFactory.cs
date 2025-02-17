@@ -11,13 +11,15 @@ public static class ServicesFactory
     {
         Name = form.Name,
         Price = form.Price,
+        UnitId = form.UnitId
     };
 
     public static ServicesModel Create(ServiceEntity entity) => new()
     {
+        Id = entity.Id,
         Name = entity.Name,
         Price = entity.Price,
-        Id = entity.Id,
+        UnitName = entity.Unit.Name,
     };
 
 }
