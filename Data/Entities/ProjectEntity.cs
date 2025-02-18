@@ -17,7 +17,7 @@ public class ProjectEntity
     [Column(TypeName = "date")]
     public DateTime EndDate { get; set; }
     [Required]
-    public decimal TotalPrice { get; set; } 
+    public decimal TotalPrice { get; set; }
 
     //Kopplingar
     public int EmployeeId { get; set; }

@@ -12,6 +12,8 @@ public class ProjectRepository(DataContext context) : BaseRepository<ProjectEnti
     public override async Task<IEnumerable<ProjectEntity>> GetAllAsync()
     {
         return await _context.Projects
+            .Include(p => p.Service)
+                .ThenInclude(u => u.Unit)
             .Include(p => p.Status)
             .Include(p => p.Customer)
                 .ThenInclude(c => c.CustomerContacts)

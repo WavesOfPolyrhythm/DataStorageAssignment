@@ -14,11 +14,18 @@ public class ProjectModel
 
     [Column(TypeName = "date")]
     public DateTime EndDate { get; set; }
+
+    public decimal TotalPrice { get; set; }
+
+    public string ServiceName { get; set; } = null!;
+    public decimal ServicePrice { get; set; }
+
+    public string Unit {  get; set; } = null!;
     public string CustomerName { get; set; } = null!;
+    public string CustomerContact { get; set; } = null!;
     public string StatusName { get; set; } = null!;
 
     public string ProjectManager { get; set; } = null!;
     public string Role { get; set; } = null!;
-    public string CustomerContact { get; set; } = null!;
 
 }   
