@@ -1,4 +1,5 @@
-﻿using Business.Interfaces;
+﻿using Business.Dtos;
+using Business.Interfaces;
 using Presentation.Interfaces;
 
 namespace Presentation.Dialogs;
@@ -14,10 +15,10 @@ internal class CustomerDialogs(ICustomerService customerService, ICustomerContac
         {
             Console.Clear();
             Console.WriteLine("=== Manage Customers ===");
-            Console.WriteLine("1. Create Customer");
+            Console.WriteLine("1. Add Customer");
             Console.WriteLine("2. View all Customers");
             Console.WriteLine("3. Update Customer");
-            Console.WriteLine("4. Delete Customer");
+            Console.WriteLine("4. Remove Customer");
             Console.WriteLine("5. Manage Customer Contacts");
             Console.WriteLine("0. Back to Main Menu");
 
@@ -26,20 +27,16 @@ internal class CustomerDialogs(ICustomerService customerService, ICustomerContac
             switch (choice)
             {
                 case "1":
-                    Console.Clear();
-                    Console.WriteLine("Creates Customer...");
+                    await CreateCustomerDialog();
                     break;
                 case "2":
-                    Console.Clear();
-                    Console.WriteLine("View Customers...");
+                    await ViewAllCustomerDialog();
                     break;
                 case "3":
-                    Console.Clear();
-                    Console.WriteLine("Update Customer...");
+                    await UpdateCustomerDialog();
                     break;
                 case "4":
-                    Console.Clear();
-                    Console.WriteLine("Delete Customer...");
+                    await DeleteCustomerDialog();
                     break;
                 case "5":
                     Console.Clear();
@@ -56,6 +53,127 @@ internal class CustomerDialogs(ICustomerService customerService, ICustomerContac
             }
             Console.WriteLine("\nPress any key to return to the menu...");
             Console.ReadKey();
+        }
+    }
+
+    public async Task CreateCustomerDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--ADD CUSTOMER--\n");
+        var form = new CustomerRegistrationForm();
+
+        Console.Write("Enter Customer Company Name: ");
+        form.CustomerName = Console.ReadLine()!;
+
+        var result = await _customerService.CreateCustomerAsync(form);
+        if (result != null)
+        {
+            Console.WriteLine($"\nCustomer was added: '{result.CustomerName}'");
+        }
+        else
+        {
+            Console.WriteLine("Failed to add Customer.");
+        }
+    }
+
+    public async Task ViewAllCustomerDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--ALL CUSTOMERS--\n");
+        var customers = await _customerService.GetAllCustomersAsync();
+        if (customers.Any())
+        {
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.Id}. {customer.CustomerName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Customers available right now.");
+        }
+    }
+
+    public async Task UpdateCustomerDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--UPDATE CUSTOMER--\n");
+        var customers = await _customerService.GetAllCustomersAsync();
+        if (customers.Any())
+        {
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.Id}. {customer.CustomerName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Customers available right now.");
+        }
+
+        Console.Write("\nEnter Customer Id you want to update: ");
+        if (!int.TryParse(Console.ReadLine(), out var customerId))
+        {
+            Console.Clear();
+            Console.WriteLine("\nInvalid ID. Returning to Customer menu...");
+            return;
+        }
+
+        Console.Write("\nEnter new Company name of Customer - (leave blank to keep current): ");
+        var customerName = Console.ReadLine()!;
+
+        var updateCustomer = new CustomerUpdateForm
+        {
+            Id = customerId,
+            CustomerName = customerName,
+        };
+
+        var result = await _customerService.UpdateCustomerAsync(updateCustomer);
+
+        if(result != null)
+        {
+            Console.WriteLine($"\nCustomer was successfully updated: '{result.CustomerName}'");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to update Customer.");
+        }
+    }
+
+    public async Task DeleteCustomerDialog()
+    {
+        Console.Clear(); 
+        Console.WriteLine("\n--REMOVE CUSTOMER--\n");
+        var customers = await _customerService.GetAllCustomersAsync();
+        if (customers.Any())
+        {
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.Id}. {customer.CustomerName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Customers available right now. Returning to menu");
+            return;
+        }
+
+        Console.Write("\nEnter Id of Customer you want to remove: ");
+        if (!int.TryParse(Console.ReadLine(), out int customerId))
+        {
+            Console.WriteLine("\nInvalid Customer Id. Returning to menu...");
+            return;
+        }
+
+        var result = await _customerService.DeleteCustomerAsync(customerId);
+
+        if(result)
+        {
+            Console.WriteLine("\nCustomer was successfully removed.");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to remove customer.");
         }
     }
 }

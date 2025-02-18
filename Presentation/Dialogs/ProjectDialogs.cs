@@ -52,4 +52,10 @@ public class ProjectDialogs(IProjectService projectService) : IProjectDialogs
             Console.ReadKey();
         }
     }
+
+    public async Task CreateProjectDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--CREATE PROJECT--\n");
+    }
 }

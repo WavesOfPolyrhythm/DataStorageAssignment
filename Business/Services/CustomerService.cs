@@ -2,8 +2,10 @@
 using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
+using Data.Entities;
 using Data.Interfaces;
 using Data.Repositories;
+using System.Linq.Expressions;
 
 namespace Business.Services;
 
@@ -27,5 +29,39 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
         var entities = await _customerRepository.GetAllAsync();
         var customers = entities.Select(CustomerFactory.Create);
         return customers;
+    }
+
+    public async Task<CustomerEntity?> GetCustomerEntityAsync(Expression<Func<CustomerEntity, bool>> expression)
+    {
+        var customer = await _customerRepository.GetAsync(expression);
+        return customer;
+    }
+
+    public async Task<CustomerModel?> UpdateCustomerAsync(CustomerUpdateForm form)
+    {
+        try
+        {
+            var existingEntity = await GetCustomerEntityAsync(x => x.Id == form.Id);
+
+            if (existingEntity == null)
+                return null!;
+
+            existingEntity.CustomerName = string.IsNullOrWhiteSpace(form.CustomerName) ? existingEntity.CustomerName : form.CustomerName;
+
+            var updatedEntity = await _customerRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
+            return CustomerFactory.Create(updatedEntity);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return null;
+        }
+
+    }
+
+    public async Task<bool> DeleteCustomerAsync(int id)
+    {
+        var result = await _customerRepository.DeleteAsync(x => x.Id == id);
+        return result;
     }
 }
