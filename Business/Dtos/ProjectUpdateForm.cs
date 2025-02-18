@@ -19,4 +19,18 @@ public class ProjectUpdateForm
 
     [Column(TypeName = "date")]
     public DateTime EndDate { get; set; }
+
+    //Ta bort denna sen, ska räknas ut automatiskt i factoryn?
+    [Required]
+    public decimal? TotalPrice { get; set; }
+
+    //Kopplingar
+    [Required]
+    public int EmployeeId { get; set; }
+    [Required]
+    public int CustomerId { get; set; }
+    [Required]
+    public int ServiceId { get; set; }
+    [Required]
+    public int StatusId { get; set; }
 }

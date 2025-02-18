@@ -7,6 +7,7 @@ namespace Business.Factories;
 public static class ProjectFactory
 {
     public static ProjectRegistrationForm Create() => new();
+    public static ProjectUpdateForm Update() => new();
 
 
     public static ProjectEntity Create(ProjectRegistrationForm form) => new()
@@ -46,6 +47,24 @@ public static class ProjectFactory
         CustomerContact = entity.Customer.CustomerContacts.FirstOrDefault() != null
         ? $"{entity.Customer.CustomerContacts.First().Name} ({entity.Customer.CustomerContacts.First().Email})"
         : "No Contact"
+    };
+
+    public static ProjectEntity Update(ProjectUpdateForm form, ProjectEntity existingEntity) => new()
+    {
+        Id = form.Id,
+        Title = form.Title,
+        Description = form.Description,
+        StartDate = form.StartDate,
+        EndDate = form.EndDate,
+        TotalPrice = form.TotalPrice ?? 0,
+        EmployeeId = form.EmployeeId,
+        Employee = existingEntity.Employee,
+        CustomerId = form.CustomerId,
+        Customer = existingEntity.Customer,
+        ServiceId = form.ServiceId,
+        Service = existingEntity.Service,
+        StatusId = form.StatusId,
+        Status = existingEntity.Status,
     };
  
 }
