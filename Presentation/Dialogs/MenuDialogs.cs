@@ -41,6 +41,7 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
                     Console.Clear();
                     var projectDialogs = new ProjectDialogs(_projectService, _customerService, _employeeService, _servicesService, _statusService);
                     await projectDialogs.MenuOptions();
+                    
                     break;
                 case "2":
                     Console.Clear();

@@ -14,15 +14,15 @@ public class ProjectUpdateForm
     [Required]
 
     [Column(TypeName = "date")]
-    public DateTime StartDate { get; set; }
+    public DateTime StartDate { get; set; } 
     [Required]
 
-    [Column(TypeName = "date")]
+    [Column(TypeName = "date")] 
     public DateTime EndDate { get; set; }
 
     //Ta bort denna sen, ska räknas ut automatiskt i factoryn?
     [Required]
-    public decimal? TotalPrice { get; set; }
+    public decimal? TotalPrice { get; set; } 
 
     //Kopplingar
     [Required]

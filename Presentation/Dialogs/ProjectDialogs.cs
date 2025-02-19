@@ -1,6 +1,7 @@
 ﻿using Business.Dtos;
 using Business.Interfaces;
 using Presentation.Interfaces;
+using System.Data;
 
 namespace Presentation.Dialogs;
 
@@ -35,12 +36,10 @@ public class ProjectDialogs(IProjectService projectService, ICustomerService cus
                     await ViewAllProjectsDialog();
                     break;
                 case "3":
-                    Console.Clear();
-                    Console.WriteLine("Update Projects...");
+                    await UpdateProjectDialog();
                     break;
                 case "4":
-                    Console.Clear();
-                    Console.WriteLine("Delete Project...");
+                    await DeleteProjectDialog();
                     break;
                 case "0":
                     Console.Clear();
@@ -229,6 +228,223 @@ public class ProjectDialogs(IProjectService projectService, ICustomerService cus
                 Console.WriteLine($"Status: {project.StatusName}");
                 Console.WriteLine("------------------------");
             }
+        }
+    }
+
+    public async Task UpdateProjectDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("\n--UPDATE PROJECT--\n");
+        var projects = await _projectService.GetAllProjectsAsync();
+        if (projects.Any())
+        {
+            foreach ( var project in projects )
+            {
+                Console.WriteLine($"ID:{project.Id} Title: {project.Title} ");
+                Console.WriteLine("-----------------------------");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Projects available at the moment.");
+        }
+
+        Console.Write("\nEnter Project ID to update information: ");
+        if (!int.TryParse(Console.ReadLine(), out var projectId))
+        {
+            Console.Clear();
+            Console.WriteLine("\nInvalid ID. Returning to Service menu...");
+            return;
+        }
+
+        Console.Write("\nEnter new Title - (leave blank to keep current): ");
+        var projectTitle = Console.ReadLine()!;
+        Console.Write("\nEnter new Description - (leave blank to keep current): ");
+        var projectDescription = Console.ReadLine()!;
+        Console.Write("\nEnter new Start Date (yyy-MM-dd) ");
+        var startDate = DateTime.Parse(Console.ReadLine()!);
+        Console.Write("\nEnter new End Date (yyy-MM-dd) ");
+        var endDate = DateTime.Parse(Console.ReadLine()!);
+        Console.Write("\nEnter new Total Price: ");
+        var totalPrice = decimal.Parse(Console.ReadLine()!);
+
+        var form = new ProjectUpdateForm
+        {
+           Id = projectId,
+           Title = projectTitle,
+           Description = projectDescription,
+           StartDate = startDate,
+           EndDate = endDate,
+           TotalPrice = totalPrice,
+        };
+        Console.Clear();
+        Console.WriteLine("\n--Available Employees--\n");
+        var employees = await _employeeService.GetAllEmployeesAsync();
+        if (employees.Any())
+        {
+            foreach (var employee in employees)
+            {
+                Console.WriteLine($"{employee.Id}. {employee.Name} - [ {employee.RoleName} ]");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo available Employees. Please add employee in 'Manage Employees Menu'");
+        }
+
+        int employeeId;
+        while (true)
+        {
+            Console.Write("\nEnter Employee ID for the updated Project: ");
+            if (int.TryParse(Console.ReadLine(), out employeeId) && employees.Any(e => e.Id == employeeId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Employee Id. Try again!");
+        }
+
+        form.EmployeeId = employeeId;
+
+        Console.WriteLine("\n--Available Customers--\n");
+        var customers = await _customerService.GetAllCustomersAsync();
+        if (customers.Any())
+        {
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.Id}. {customer.CustomerName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo available Customers. Please add Customer in 'Manage Customers Menu'");
+        }
+
+        int customerId;
+        while (true)
+        {
+            Console.Write("\nEnter Customer ID for the updated Project: ");
+            if (int.TryParse(Console.ReadLine(), out customerId) && customers.Any(c => c.Id == customerId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Customer Id. Try again!");
+        }
+
+        form.CustomerId = customerId;
+
+        Console.WriteLine("\n--Available Services--\n");
+        var services = await _servicesService.GetAllServicesAsync();
+        if (services.Any())
+        {
+            foreach (var service in services)
+            {
+                Console.WriteLine($"{service.Id}. {service.Name}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo available Services. Please add Service in 'Manage Services Menu'");
+        }
+
+        int serviceId;
+        while (true)
+        {
+            Console.Write("\nEnter Service ID for the updated Project: ");
+            if (int.TryParse(Console.ReadLine(), out serviceId) && services.Any(s => s.Id == serviceId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Customer Id. Try again!");
+        }
+
+        form.ServiceId = serviceId;
+
+        Console.WriteLine("\n---Statuses---\n");
+        var statuses = await _statusService.GetAllStatusesAsync();
+        if (statuses.Any())
+        {
+            foreach (var status in statuses)
+            {
+                Console.WriteLine($"{status.Id}. {status.StatusName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo available Statuses. Please add Status in 'Manage Statuses Menu'");
+        }
+
+        int statusId;
+        while (true)
+        {
+            Console.Write("\nEnter Status ID for the updated Project: ");
+            if (int.TryParse(Console.ReadLine(), out statusId) && statuses.Any(s => s.Id == statusId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Status Id. Try again!");
+        }
+
+        form.StatusId = statusId;
+
+        var result = await _projectService.UpdateProjectAsync(form);
+
+        if (result != null)
+        {
+            Console.WriteLine("\nProject successfully updated!");
+            Console.WriteLine("------------------------");
+            Console.WriteLine($"Title: '{result.Title}'");
+            Console.WriteLine($"Description: '{result.Description}'");
+            Console.WriteLine($"Start Date: {result.StartDate:yyyy-MM-dd}");
+            Console.WriteLine($"End Date: {result.EndDate:yyyy-MM-dd}");
+            Console.WriteLine($"Total Price: {result.TotalPrice}kr");
+            Console.WriteLine($"Project Manager: {result.ProjectManager} [{result.Role}]");
+            Console.WriteLine($"Customer: {result.CustomerName}");
+            Console.WriteLine($"Contact Person: {result.CustomerContact}");
+            Console.WriteLine($"Service: {result.ServiceName} {result.ServicePrice} / {result.Unit}");
+            Console.WriteLine($"Status: {result.StatusName}");
+            Console.WriteLine("------------------------");
+        }
+        else
+        {
+            Console.WriteLine("\nFailed to update Project");
+        }
+    }
+
+    public async Task DeleteProjectDialog()
+    {
+        Console.Clear();
+        Console.WriteLine("--REMOVE PROJECT--");
+        var projects = await _projectService.GetAllProjectsAsync();
+        if (projects.Any())
+        {
+            foreach (var project in projects)
+            {
+                Console.WriteLine($"ID:{project.Id} Title: {project.Title} ");
+                Console.WriteLine("-----------------------------");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Projects available at the moment.");
+        }
+
+        Console.Write("\nEnter Project ID you want to remove: ");
+        if (!int.TryParse(Console.ReadLine(), out var projectId))
+        {
+            Console.Clear();
+            Console.WriteLine("\nInvalid ID. Returning to Service menu...");
+            return;
+        }
+
+        var result = await _projectService.DeleteProjectAsync(projectId);
+
+        if (result)
+        {
+            Console.WriteLine("\nProject was successfully removed!");
+        }
+        else
+        {
+            Console.WriteLine("Failed to remove project.");
         }
     }
 
