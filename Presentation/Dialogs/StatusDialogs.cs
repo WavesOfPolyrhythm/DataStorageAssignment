@@ -116,11 +116,11 @@ public class StatusDialogs(IStatusService statusService) : IStatusDialogs
         }
 
         Console.Write("\nEnter new name for Status - (leave blank to keep current): ");
-        var statusName = Console.ReadLine();
+        var statusName = Console.ReadLine()!;
         var updateStatus = new StatusUpdateForm()
         {
             Id = statusId,
-            StatusName = string.IsNullOrWhiteSpace(statusName) ? null! : statusName,
+            StatusName = statusName,
         };
 
         var result = await _statusService.UpdateStatusAsync(updateStatus);

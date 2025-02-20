@@ -47,10 +47,12 @@ public class RoleService(IRolesRepository rolesRepository) : IRoleService
             if (existingEntity == null)
                 return null!;
 
-            existingEntity.RoleName = string.IsNullOrWhiteSpace(form.RoleName) ? existingEntity.RoleName : form.RoleName;
+            var updatedEntity = RolesFactory.Update(form, existingEntity);
+            updatedEntity = await _rolesRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+            if (updatedEntity == null) 
+                return null!;
 
-            var updatedEntity = await _rolesRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
-            return RolesFactory.Create(existingEntity);
+            return RolesFactory.Create(updatedEntity);
         }
         catch (Exception ex)
         {

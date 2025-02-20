@@ -19,10 +19,10 @@ public static class StatusFactory
         StatusName = entity.StatusName,
     };
 
-    public static StatusEntity Update(StatusUpdateForm form) => new()
+    public static StatusEntity Update(StatusUpdateForm form, StatusEntity existingEntity) => new()
     {
         Id = form.Id,
-        StatusName = form.StatusName,
+        StatusName = string.IsNullOrWhiteSpace(form.StatusName) ? existingEntity.StatusName : form.StatusName,
     };
 
 }

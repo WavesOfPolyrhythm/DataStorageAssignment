@@ -47,10 +47,12 @@ public class StatusService(IStatusRepository statusRepository) : IStatusService
             if (existingEntity == null)
                 return null!;
 
-            existingEntity.StatusName = string.IsNullOrWhiteSpace(form.StatusName) ? existingEntity.StatusName : form.StatusName;
+            var updatedEntity = StatusFactory.Update(form, existingEntity);
+            updatedEntity = await _statusRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+            if (updatedEntity == null)
+                return null!;
 
-            var updatedEntity = await _statusRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
-            return StatusFactory.Create(existingEntity);
+            return StatusFactory.Create(updatedEntity);
         }
         catch (Exception ex)
         {

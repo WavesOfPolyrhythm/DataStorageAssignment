@@ -126,7 +126,7 @@ public class RoleDialogs(IRoleService roleService) : IRoleDialogs
         var updateRoleName = new RolesUpdateForm
         {
             Id = roleId,
-            RoleName = string.IsNullOrWhiteSpace(roleName) ? null! : roleName,
+            RoleName = roleName,
         };
 
         var result = await _roleService.UpdateRolesAsync(updateRoleName);

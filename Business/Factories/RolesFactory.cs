@@ -20,9 +20,9 @@ public static class RolesFactory
         RoleName = entity.RoleName,
     };
 
-    public static RolesUpdateForm Create(RolesUpdateForm form) => new()
+    public static RoleEntity Update(RolesUpdateForm form, RoleEntity existingEntity) => new()
     {
         Id = form.Id,
-        RoleName = form.RoleName,
+        RoleName = string.IsNullOrWhiteSpace(form.RoleName) ? existingEntity.RoleName : form.RoleName,
     };
 }
