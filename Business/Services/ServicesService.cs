@@ -9,9 +9,10 @@ using System.Linq.Expressions;
 
 namespace Business.Services;
 
-public class ServicesService(IServiceRepository serviceRepository) : IServicesService
+public class ServicesService(IServiceRepository serviceRepository, IUnitService unitService) : IServicesService
 {
     private readonly IServiceRepository _serviceRepository = serviceRepository;
+    private readonly IUnitService _unitService = unitService;
 
     public async Task<ServicesModel> CreateServicesAsync(ServicesRegistrationForm form)
     {
@@ -49,6 +50,16 @@ public class ServicesService(IServiceRepository serviceRepository) : IServicesSe
 
             existingEntity.Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name;
             existingEntity.Price = form.Price ?? existingEntity.Price;
+
+            var unit = await _unitService.GetUnitEntityAsync(x => x.Id == form.UnitId);
+            if (unit == null)
+            {
+                Console.WriteLine("\nInvalid Unit ID. Cannot update employee.");
+                return null!;
+            }
+
+            existingEntity.UnitId = form.UnitId;
+            existingEntity.Unit = unit;
 
             var updatedEntity = await _serviceRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
             return ServicesFactory.Create(existingEntity);

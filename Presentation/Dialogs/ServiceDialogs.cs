@@ -1,7 +1,9 @@
 ﻿using Business.Dtos;
 using Business.Interfaces;
+using Business.Services;
 using Presentation.Interfaces;
 using System;
+using System.Data;
 
 namespace Presentation.Dialogs;
 
@@ -153,6 +155,34 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
             Name = serviceName,
             Price = servicePrice,
         };
+
+        Console.WriteLine("\n--UNITS--\n");
+        var units = await _unitService.GetAllUnitsAsync();
+        if (units != null)
+        {
+            foreach (var unit in units)
+            {
+                Console.WriteLine($"{unit.Id}. {unit.Name}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Units found, please add a Unit in Unit menu to continue with this action.");
+            return;
+        }
+
+        int unitId;
+        while (true)
+        {
+            Console.Write("\nEnter Unit ID for the updated Service: ");
+            if (int.TryParse(Console.ReadLine(), out unitId) && units.Any(r => r.Id == unitId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Unit Id. Try again!");
+        }
+
+        updateService.UnitId = unitId;
 
         var result = await _servicesService.UpdateServiceAsync(updateService);
         if(result != null)

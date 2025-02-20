@@ -55,7 +55,7 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
     public async Task CreateUnitDialog()
     {
         Console.Clear();
-        Console.WriteLine("--Creating new Unit--");
+        Console.WriteLine("\n--Creating new Unit--\n");
 
         var form = new UnitRegistrationForm();
         Console.Write("Unit-Title: ");
@@ -67,18 +67,18 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
 
         if (result != null)
         {
-            Console.WriteLine($"Unit was created with values: {result.Name} - {result.Description}");
+            Console.WriteLine($"\nUnit was created with values: {result.Name} - {result.Description}");
         }
         else
         {
-            Console.WriteLine("Failed to create Unit.");
+            Console.WriteLine("\nFailed to create Unit.");
         }
     }
 
     public async Task ShowAllUnitsDialog()
     {
         Console.Clear();
-        Console.WriteLine("--All Units--");
+        Console.WriteLine("\n--All Units--\n");
         Console.WriteLine();
         var units = await _unitService.GetAllUnitsAsync();
         if(units != null)
@@ -97,7 +97,7 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
     public async Task UpdateUnitDialog()
     {
         Console.Clear();
-        Console.WriteLine("--Update Unit--");
+        Console.WriteLine("\n--Update Unit--\n");
         Console.WriteLine("Enter the Unit-Id you want to update below:  ");
         var units = await _unitService.GetAllUnitsAsync();
         foreach(var unit in units)
@@ -106,37 +106,37 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
         }
         if (!int.TryParse(Console.ReadLine(), out var unitId))
         {
-            Console.WriteLine("Invalid ID.");
+            Console.WriteLine("\nInvalid ID.");
             return;
         }
 
-        Console.Write("New Unit Name (leave blank to keep current): ");
-        var unitName = Console.ReadLine();
-        Console.Write("New Description (leave blank to keep current): ");
-        var description = Console.ReadLine();
+        Console.Write("\nNew Unit Name (leave blank to keep current): ");
+        var unitName = Console.ReadLine()!;
+        Console.Write("\nNew Description (leave blank to keep current): ");
+        var description = Console.ReadLine()!;
 
         var updateForm = new UnitUpdateForm
         {
             Id = unitId,
-            Name = string.IsNullOrWhiteSpace(unitName) ? null! : unitName,
-            Description = string.IsNullOrWhiteSpace(description) ? null! : description,
+            Name = unitName,
+            Description = description,
         };
 
         var result = await _unitService.UpdateUnitAsync(updateForm);
         if (result != null)
         {
-            Console.WriteLine($"Unit was successfully updated to: {result.Name}, {result.Description}. ");
+            Console.WriteLine($"\nUnit was successfully updated to: {result.Name}, {result.Description}. ");
         }
         else
         {
-            Console.WriteLine("Failed to update unit.");
+            Console.WriteLine("\nFailed to update unit.");
         }
     }
 
     public async Task DeleteUnitDialog()
     {
         Console.Clear(); 
-        Console.WriteLine("--Remove unit--");
+        Console.WriteLine("\n--Remove unit--\n");
         Console.WriteLine("Enter the Unit-Id you want to remove below:  ");
         var units = await _unitService.GetAllUnitsAsync();
         foreach (var unit in units)
@@ -145,7 +145,7 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
         }
         if (!int.TryParse(Console.ReadLine(), out var unitId))
         {
-            Console.WriteLine("Invalid ID.");
+            Console.WriteLine("\nInvalid ID.");
             return;
         }
 
@@ -153,11 +153,11 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
 
         if (result != false)
         {
-            Console.WriteLine($"Unit was successfully removed.");
+            Console.WriteLine($"\nUnit was successfully removed.");
         }
         else
         {
-            Console.WriteLine("Failed to remove unit.");
+            Console.WriteLine("\nFailed to remove unit.");
         }
     }
 }

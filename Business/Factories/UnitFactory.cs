@@ -14,18 +14,19 @@ public static class UnitFactory
         Description = form.Description,
     };
 
-    public static UnitModel Create(UnitEntity entity) => new()
+    public static UnitModel Create(UnitEntity entity) => 
+        new()
     {
         Id = entity.Id,
         Name = entity.Name,
         Description = entity.Description,
     };
 
-    public static UnitEntity Update(UnitUpdateForm form) => new()
+    public static UnitEntity Update(UnitUpdateForm form, UnitEntity existingEntity) => new()
     {
         Id = form.Id,
-        Name = form.Name,
-        Description = form.Description,
+        Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name,
+        Description = string.IsNullOrWhiteSpace(form.Description) ? existingEntity.Description : form.Description,
     };
 
 }

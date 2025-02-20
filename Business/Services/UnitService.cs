@@ -46,11 +46,14 @@ public class UnitService(IUnitRepository unitRepository) : IUnitService
             if (existingEntity == null)
                 return null!;
 
-            existingEntity.Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name;
-            existingEntity.Description = string.IsNullOrWhiteSpace(form.Description) ? existingEntity.Description : form.Description;
 
-            var updatedEntity = await _unitRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
-            return UnitFactory.Create(existingEntity);
+            var updatedEntity = UnitFactory.Update(form, existingEntity);
+            updatedEntity = await _unitRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+
+            if (updatedEntity == null)
+                return null!;
+
+            return UnitFactory.Create(updatedEntity);
         }
         catch (Exception ex)
         {
