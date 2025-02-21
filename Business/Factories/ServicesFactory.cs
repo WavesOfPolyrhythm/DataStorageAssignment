@@ -23,12 +23,13 @@ public static class ServicesFactory
         UnitName = entity.Unit.Name,
     };
 
-    public static ServiceEntity Update(ServicesUpdateForm form) => new()
+    public static ServiceEntity Update(ServicesUpdateForm form, ServiceEntity existingEntity) => new()
     {
         Id = form.Id,
-        Name = form.Name,
-        Price = form.Price ?? 0,
+        Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name,
+        Price = form.Price ?? existingEntity.Price,
         UnitId = form.UnitId,
+        Unit = existingEntity.Unit
     };
 
 }

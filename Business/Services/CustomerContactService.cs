@@ -5,13 +5,15 @@ using Business.Models;
 using Data.Entities;
 using Data.Interfaces;
 using Data.Repositories;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace Business.Services;
 
-public class CustomerContactService(ICustomerContactRepository customerContactRepository) : ICustomerContactService
+public class CustomerContactService(ICustomerContactRepository customerContactRepository, ICustomerService customerService) : ICustomerContactService
 {
     private readonly ICustomerContactRepository _customerContactRepository = customerContactRepository;
+    private readonly ICustomerService _customerService = customerService;
 
     public async Task<CustomerContactModel> CreateCustomerContactAsync(CustomerContactRegistrationForm form)
     {
@@ -42,15 +44,22 @@ public class CustomerContactService(ICustomerContactRepository customerContactRe
         try
         {
             var existingEntity = await GetCustomerContactEntityAsync(x => x.Id == form.Id);
-
             if (existingEntity == null)
                 return null!;
 
-            existingEntity.Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name;
-            existingEntity.Email = string.IsNullOrWhiteSpace(form.Email) ? existingEntity.Email : form.Email;
-            existingEntity.PhoneNumber = string.IsNullOrWhiteSpace(form.PhoneNumber) ? existingEntity.PhoneNumber : form.PhoneNumber;
+            var customer = await _customerService.GetCustomerEntityAsync(x => x.Id == form.CustomerId);
+            if (customer == null)
+            {
+                Console.WriteLine("\nInvalid Customer ID. Can not update Customer Contact.");
+                return null!;
+            }
 
-            var updatedEntity = await _customerContactRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
+            var updatedEntity = CustomerContactFactory.Update(form, existingEntity);
+
+            updatedEntity = await _customerContactRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+            if (updatedEntity == null)
+                return null!;
+
             return CustomerContactFactory.Create(updatedEntity);
         }
         catch (Exception ex)

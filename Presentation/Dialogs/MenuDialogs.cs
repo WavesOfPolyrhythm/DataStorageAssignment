@@ -39,7 +39,7 @@ public class MenuDialogs(IProjectService projectService, IUnitService unitServic
             {
                 case "1":
                     Console.Clear();
-                    var projectDialogs = new ProjectDialogs(_projectService, _customerService, _employeeService, _servicesService, _statusService);
+                    var projectDialogs = new ProjectDialogs(_projectService, _customerService, _employeeService, _servicesService, _statusService, _unitService);
                     await projectDialogs.MenuOptions();
                     
                     break;

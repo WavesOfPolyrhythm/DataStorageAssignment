@@ -48,9 +48,6 @@ public class ServicesService(IServiceRepository serviceRepository, IUnitService 
             if (existingEntity == null)
                 return null!;
 
-            existingEntity.Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name;
-            existingEntity.Price = form.Price ?? existingEntity.Price;
-
             var unit = await _unitService.GetUnitEntityAsync(x => x.Id == form.UnitId);
             if (unit == null)
             {
@@ -58,11 +55,15 @@ public class ServicesService(IServiceRepository serviceRepository, IUnitService 
                 return null!;
             }
 
-            existingEntity.UnitId = form.UnitId;
-            existingEntity.Unit = unit;
+            var updatedEntity = ServicesFactory.Update(form, existingEntity);
+            updatedEntity.Unit = unit;
 
-            var updatedEntity = await _serviceRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
-            return ServicesFactory.Create(existingEntity);
+            updatedEntity = await _serviceRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+
+            if (updatedEntity == null) 
+                return null!;
+
+            return ServicesFactory.Create(updatedEntity);
         }
         catch (Exception ex)
         {

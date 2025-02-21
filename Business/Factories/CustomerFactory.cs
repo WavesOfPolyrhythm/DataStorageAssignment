@@ -20,9 +20,9 @@ public static class CustomerFactory
         CustomerName = entity.CustomerName,
     };
 
-    public static CustomerEntity Update(CustomerUpdateForm form) => new()
+    public static CustomerEntity Update(CustomerUpdateForm form, CustomerEntity existingEntity) => new()
     {
         Id = form.Id,
-        CustomerName = form.CustomerName,
+        CustomerName = string.IsNullOrWhiteSpace(form.CustomerName) ? existingEntity.CustomerName : form.CustomerName,
     };
 }

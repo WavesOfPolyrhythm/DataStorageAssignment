@@ -1,6 +1,8 @@
 ﻿using Business.Dtos;
 using Business.Interfaces;
+using Business.Services;
 using Presentation.Interfaces;
+using System.Data;
 
 namespace Presentation.Dialogs;
 
@@ -150,8 +152,33 @@ public class CustomerContactDialogs(ICustomerContactService customerContactServi
         var contactEmail = Console.ReadLine()!;
         Console.Write("\nEnter Phone number of Customer Contact - (leave blank to keep current): ");
         var contactPhone = Console.ReadLine()!;
-
         var contactId = customerContactId;
+
+        Console.WriteLine("\n--Change Customer--\n");
+        var customers = await _customerService.GetAllCustomersAsync();
+        if (customers != null)
+        {
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.Id}. {customer.CustomerName}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo Customer found, please add Customer in Customer menu to continue with this action.");
+            return;
+        }
+
+        int customerId;
+        while (true)
+        {
+            Console.Write("\nEnter new Customer ID for the updated Customer Contact: ");
+            if (int.TryParse(Console.ReadLine(), out customerId) && customers.Any(r => r.Id == customerId))
+            {
+                break;
+            }
+            Console.WriteLine("\nInvalid Customer Id. Try again!");
+        }
 
         var updateCustomerContact = new CustomerContactUpdateForm
         {
@@ -160,6 +187,8 @@ public class CustomerContactDialogs(ICustomerContactService customerContactServi
             Email = contactEmail,
             PhoneNumber = contactPhone,
         };
+
+        updateCustomerContact.CustomerId = customerId;
 
         var updatedContact = await _customerContactService.UpdateCustomerContactAsync(updateCustomerContact);
         if (updatedContact != null)

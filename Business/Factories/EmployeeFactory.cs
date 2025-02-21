@@ -26,9 +26,9 @@ public static class EmployeeFactory
     public static EmployeeEntity Update(EmployeeUpdateForm form, EmployeeEntity existingEntity) => new()
     {
         Id = form.Id,
-        Name = form.Name,
-        Email = form.Email,
-        RoleId= form.RoleId,
+        Name = string.IsNullOrWhiteSpace(form.Name) ? existingEntity.Name : form.Name,
+        Email = string.IsNullOrWhiteSpace(form.Email) ? existingEntity.Email : form.Email,
+        RoleId = form.RoleId,
         Role = existingEntity.Role
     };
 }

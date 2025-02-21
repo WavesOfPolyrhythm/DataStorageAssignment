@@ -33,4 +33,7 @@ public class ProjectUpdateForm
     public int ServiceId { get; set; }
     [Required]
     public int StatusId { get; set; }
+
+    [Required]
+    public int Units { get; set; }
 }

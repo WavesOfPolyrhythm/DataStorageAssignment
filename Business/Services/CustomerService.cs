@@ -46,9 +46,12 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
             if (existingEntity == null)
                 return null!;
 
-            existingEntity.CustomerName = string.IsNullOrWhiteSpace(form.CustomerName) ? existingEntity.CustomerName : form.CustomerName;
+            var updatedEntity = CustomerFactory.Update(form, existingEntity);
 
-            var updatedEntity = await _customerRepository.UpdateAsync(x => x.Id == form.Id, existingEntity);
+            updatedEntity = await _customerRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+            if (updatedEntity == null) 
+                return null!;
+
             return CustomerFactory.Create(updatedEntity);
         }
         catch (Exception ex)
