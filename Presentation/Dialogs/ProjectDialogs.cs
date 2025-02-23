@@ -514,7 +514,7 @@ public class ProjectDialogs(IProjectService projectService, ICustomerService cus
             Console.WriteLine("\nNo Projects available at the moment.");
         }
 
-        Console.Write("\nEnter Project ID you want to remove: ");
+        Console.Write("\nEnter Project ID you want to remove (Enter numbers only): ");
         if (!int.TryParse(Console.ReadLine(), out var projectId))
         {
             Console.Clear();

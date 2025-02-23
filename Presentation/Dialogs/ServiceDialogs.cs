@@ -69,16 +69,6 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
             return;
         }
 
-        Console.Write("Enter Price: ");
-        if (decimal.TryParse(Console.ReadLine(), out decimal price))
-        {
-            form.Price = price;
-        }
-        else
-        {
-            Console.WriteLine("Invalid price. Please try agian");
-        }
-
         Console.WriteLine("\nSelect Unit for the Service: ");
         var units = await _unitService.GetAllUnitsAsync();
 
@@ -102,6 +92,17 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
         }
 
         form.UnitId = unitId;
+
+        Console.Write("Enter Price (For the Unit): ");
+        if (decimal.TryParse(Console.ReadLine(), out decimal price))
+        {
+            form.Price = price;
+        }
+        else
+        {
+            Console.WriteLine("Invalid price. Please try agian");
+        }
+
 
         var result = await _servicesService.CreateServicesAsync(form);
 
@@ -160,20 +161,8 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
             Console.WriteLine("\nInvalid ID. Returning to Service menu...");
             return;
         }
-        Console.Write("\nName of the Role - (leave blank to keep current): ");
+        Console.Write("\nName of the Service - (leave blank to keep current): ");
         var serviceName = Console.ReadLine()!;
-
-        Console.Write("\nEnter Price of Service ");
-        if (!decimal.TryParse(Console.ReadLine(), out decimal servicePrice))
-        {
-            Console.WriteLine("Invalid price. Please try agian");
-        }
-        var updateService = new ServicesUpdateForm
-        {
-            Id = serviceId,
-            Name = serviceName,
-            Price = servicePrice,
-        };
 
         Console.WriteLine("\n--UNITS--\n");
         var units = await _unitService.GetAllUnitsAsync();
@@ -200,6 +189,19 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
             }
             Console.WriteLine("\nInvalid Unit Id. Try again!");
         }
+
+        Console.Write("\nEnter Price of Service ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal servicePrice))
+        {
+            Console.WriteLine("Invalid price. Please try agian");
+        }
+
+        var updateService = new ServicesUpdateForm
+        {
+            Id = serviceId,
+            Name = serviceName,
+            Price = servicePrice,
+        };
 
         updateService.UnitId = unitId;
 

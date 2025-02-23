@@ -59,7 +59,7 @@ public class StatusDialogs(IStatusService statusService) : IStatusDialogs
         var form = new StatusRegistrationForm();
         Console.Clear();
         Console.WriteLine("\n--CREATING NEW STATUS--");
-        Console.WriteLine("Enter name of the Status, Example: 'In progress'");
+        Console.Write("Enter name of the Status, Example: 'In progress'");
         form.StatusName = Console.ReadLine()!;
         if (string.IsNullOrWhiteSpace(form.StatusName))
         {

@@ -59,7 +59,7 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
         Console.Clear();
         Console.WriteLine("\n--Creating new Unit--\n");
 
-        Console.Write("Unit-Title: ");
+        Console.Write("Name of the Unit (Hour, Fixed Price, Days etc...): ");
         form.Name = Console.ReadLine()!;
         if (string.IsNullOrWhiteSpace(form.Name))
         {
