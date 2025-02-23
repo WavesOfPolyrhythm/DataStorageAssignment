@@ -16,15 +16,39 @@ public class ServicesService(IServiceRepository serviceRepository, IUnitService 
 
     public async Task<ServicesModel> CreateServicesAsync(ServicesRegistrationForm form)
     {
-        var existingService = await _serviceRepository.GetAsync(x => x.Name == form.Name);
-        if (existingService != null)
-            return null!;
+        await _serviceRepository.BeginTransactionAsync();
+        try
+        {
+            var existingService = await _serviceRepository.GetAsync(x => x.Name == form.Name);
+            if (existingService != null)
+            {
+                await _serviceRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        var entity = await _serviceRepository.CreateAsync(ServicesFactory.Create(form));
-        if (entity == null)
-            return null!;
+            var entity = await _serviceRepository.CreateAsync(ServicesFactory.Create(form));
+            if (entity == null)
+            {
+                await _serviceRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        return ServicesFactory.Create(entity);
+            var service = ServicesFactory.Create(entity);
+            if (service == null)
+            {
+                await _serviceRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _serviceRepository.CommitTransactionAsync();
+            return service;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _serviceRepository.RollbackTransactionAsync();
+            return null!;
+        }
     }
 
     public async Task<IEnumerable<ServicesModel>> GetAllServicesAsync()
@@ -40,37 +64,52 @@ public class ServicesService(IServiceRepository serviceRepository, IUnitService 
     }
 
     public async Task<ServicesModel?> UpdateServiceAsync(ServicesUpdateForm form)
+{
+    await _serviceRepository.BeginTransactionAsync();
+    try
     {
-        try
+        var existingEntity = await GetServiceEntityAsync(x => x.Id == form.Id);
+        if (existingEntity == null)
         {
-            var existingEntity = await GetServiceEntityAsync(x => x.Id == form.Id);
-
-            if (existingEntity == null)
-                return null!;
-
-            var unit = await _unitService.GetUnitEntityAsync(x => x.Id == form.UnitId);
-            if (unit == null)
-            {
-                Console.WriteLine("\nInvalid Unit ID. Cannot update employee.");
-                return null!;
-            }
-
-            var updatedEntity = ServicesFactory.Update(form, existingEntity);
-            updatedEntity.Unit = unit;
-
-            updatedEntity = await _serviceRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
-
-            if (updatedEntity == null) 
-                return null!;
-
-            return ServicesFactory.Create(updatedEntity);
+            await _serviceRepository.RollbackTransactionAsync();
+            return null!;
         }
-        catch (Exception ex)
+
+        var unit = await _unitService.GetUnitEntityAsync(x => x.Id == form.UnitId);
+        if (unit == null)
         {
-            Console.WriteLine(ex.Message);
-            return null;
+            Console.WriteLine("\nInvalid Unit ID. Rolling back transaction.");
+            await _serviceRepository.RollbackTransactionAsync();
+            return null!;
         }
+
+        var updatedEntity = ServicesFactory.Update(form, existingEntity);
+        updatedEntity.Unit = unit;
+        updatedEntity = await _serviceRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+        if (updatedEntity == null)
+        {
+            await _serviceRepository.RollbackTransactionAsync();
+            return null!;
+        }
+
+        var service = ServicesFactory.Create(updatedEntity);
+        if (service == null)
+        {
+            await _serviceRepository.RollbackTransactionAsync();
+            return null!;
+        }
+
+        await _serviceRepository.CommitTransactionAsync();
+        return service;
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        await _serviceRepository.RollbackTransactionAsync();
+        return null!;
+    }
+}
+
 
     public async Task<bool> DeleteServiceAsync(int id)
     {

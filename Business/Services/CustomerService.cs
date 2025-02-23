@@ -15,13 +15,38 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
 
     public async Task<CustomerModel> CreateCustomerAsync(CustomerRegistrationForm form)
     {
-        var existingCustomer = await _customerRepository.GetAsync(x => x.CustomerName == form.CustomerName);
-        if (existingCustomer != null)
-            return null!;
+        await _customerRepository.BeginTransactionAsync();
+        try
+        {
+            var existingCustomer = await _customerRepository.GetAsync(x => x.CustomerName == form.CustomerName);
+            if (existingCustomer == null)
+            {
+                await _customerRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        var entity = await _customerRepository.CreateAsync(CustomerFactory.Create(form));
-        var customer = CustomerFactory.Create(entity);
-        return customer ?? null!;
+            var entity = await _customerRepository.CreateAsync(CustomerFactory.Create(form));
+            if (entity == null)
+            {
+                await _customerRepository.RollbackTransactionAsync();
+                return null!;
+            }
+            var customer = CustomerFactory.Create(entity);
+            if (customer == null)
+            {
+                await _customerRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _customerRepository.CommitTransactionAsync();
+            return customer;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _customerRepository.RollbackTransactionAsync();
+            return null!;
+        }
     }
 
     public async Task<IEnumerable<CustomerModel>> GetAllCustomersAsync()
@@ -39,27 +64,35 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
 
     public async Task<CustomerModel?> UpdateCustomerAsync(CustomerUpdateForm form)
     {
+        await _customerRepository.BeginTransactionAsync();
         try
         {
             var existingEntity = await GetCustomerEntityAsync(x => x.Id == form.Id);
 
             if (existingEntity == null)
+            {
+                await _customerRepository.RollbackTransactionAsync();
                 return null!;
+            }
 
             var updatedEntity = CustomerFactory.Update(form, existingEntity);
 
             updatedEntity = await _customerRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
-            if (updatedEntity == null) 
+            if (updatedEntity == null)
+            {
+                await _customerRepository.RollbackTransactionAsync();
                 return null!;
+            }
 
+            await _customerRepository.CommitTransactionAsync();
             return CustomerFactory.Create(updatedEntity);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            await _customerRepository.RollbackTransactionAsync();
             return null;
         }
-
     }
 
     public async Task<bool> DeleteCustomerAsync(int id)

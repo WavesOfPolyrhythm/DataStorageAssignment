@@ -17,13 +17,39 @@ public class CustomerContactService(ICustomerContactRepository customerContactRe
 
     public async Task<CustomerContactModel> CreateCustomerContactAsync(CustomerContactRegistrationForm form)
     {
-        var existingCustomerContact = await _customerContactRepository.GetAsync(x => x.Email == form.Email);
-        if (existingCustomerContact != null)
-            return null!;
+        await _customerContactRepository.BeginTransactionAsync();
+        try
+        {
+            var existingCustomerContact = await _customerContactRepository.GetAsync(x => x.Email == form.Email);
+            if (existingCustomerContact != null)
+            {
+                await _customerContactRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        var entity = await _customerContactRepository.CreateAsync(CustomerContactFactory.Create(form));
-        var customerContact = CustomerContactFactory.Create(entity);
-        return customerContact ?? null!;
+            var entity = await _customerContactRepository.CreateAsync(CustomerContactFactory.Create(form));
+            if (entity == null)
+            {
+                await _customerContactRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            var customerContact = CustomerContactFactory.Create(entity);
+            if (customerContact == null)
+            {
+                await _customerContactRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _customerContactRepository.CommitTransactionAsync();
+            return customerContact;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _customerContactRepository.RollbackTransactionAsync();
+            return null!;
+        }
     }
 
     public async Task<IEnumerable<CustomerContactModel>> GetAllCustomerContactsAsync()
@@ -41,34 +67,50 @@ public class CustomerContactService(ICustomerContactRepository customerContactRe
 
     public async Task<CustomerContactModel?> UpdateCustomerContactAsync(CustomerContactUpdateForm form)
     {
+        await _customerContactRepository.BeginTransactionAsync();
         try
         {
             var existingEntity = await GetCustomerContactEntityAsync(x => x.Id == form.Id);
             if (existingEntity == null)
+            {
+                await _customerContactRepository.RollbackTransactionAsync();
                 return null!;
+            }
 
             var customer = await _customerService.GetCustomerEntityAsync(x => x.Id == form.CustomerId);
             if (customer == null)
             {
-                Console.WriteLine("\nInvalid Customer ID. Can not update Customer Contact.");
+                Console.WriteLine("\nInvalid Customer ID. Rolling back transaction.");
+                await _customerContactRepository.RollbackTransactionAsync();
                 return null!;
             }
 
             var updatedEntity = CustomerContactFactory.Update(form, existingEntity);
-
             updatedEntity = await _customerContactRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
             if (updatedEntity == null)
+            {
+                await _customerContactRepository.RollbackTransactionAsync();
                 return null!;
+            }
 
-            return CustomerContactFactory.Create(updatedEntity);
+            var contact = CustomerContactFactory.Create(updatedEntity);
+            if (contact == null)
+            {
+                await _customerContactRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _customerContactRepository.CommitTransactionAsync();
+            return contact;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-            return null;
+            Console.WriteLine($"Error updating customer contact: {ex.Message}");
+            await _customerContactRepository.RollbackTransactionAsync();
+            return null!;
         }
-
     }
+
 
     public async Task<bool> DeleteCustomerContactAsync(int id)
     {

@@ -4,6 +4,7 @@ using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
 using Data.Interfaces;
+using Data.Repositories;
 using System.Linq.Expressions;
 
 namespace Business.Services;
@@ -14,15 +15,39 @@ public class UnitService(IUnitRepository unitRepository) : IUnitService
 
     public async Task<UnitModel> CreateUnitsAsync(UnitRegistrationForm form)
     {
-        var existingUnit = await _unitRepository.GetAsync(x => x.Name == form.Name);
-        if (existingUnit != null)
-            return null!;
+        await _unitRepository.BeginTransactionAsync();
+        try
+        {
+            var existingUnit = await _unitRepository.GetAsync(x => x.Name == form.Name);
+            if (existingUnit != null)
+            {
+                await _unitRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        var entity = await _unitRepository.CreateAsync(UnitFactory.Create(form));
-        if (entity == null)
-            return null!;
+            var entity = await _unitRepository.CreateAsync(UnitFactory.Create(form));
+            if (entity == null)
+            {
+                await _unitRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        return UnitFactory.Create(entity);
+            var unit = UnitFactory.Create(entity);
+            if (unit == null)
+            {
+                await _unitRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _unitRepository.CommitTransactionAsync();
+            return unit;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _unitRepository.RollbackTransactionAsync();
+            return null!;
+        }
     }
 
     public async Task<IEnumerable<UnitModel>> GetAllUnitsAsync()

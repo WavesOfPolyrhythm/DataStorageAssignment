@@ -27,32 +27,52 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerServi
 
     public async Task<ProjectModel> CreateProjectAsync(ProjectRegistrationForm form)
     {
-        var existingProject = await _projectRepository.GetAsync(x => x.Title == form.Title);
-        if (existingProject != null)
-            return null!;
+        await _projectRepository.BeginTransactionAsync();
 
-        var customer = await _customerService.GetCustomerEntityAsync(x => x.Id == form.CustomerId);
-        if (customer == null)
+        try
         {
-            Console.WriteLine("\n Customer not found. Returning to menu.");
+            var existingProject = await _projectRepository.GetAsync(x => x.Title == form.Title);
+            if (existingProject == null)
+            {
+                await _projectRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            var customer = await _customerService.GetCustomerEntityAsync(x => x.Id == form.CustomerId);
+            if (customer == null)
+            {
+                Console.WriteLine("\n Customer not found. Returning to menu.");
+                await _projectRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            var service = await _servicesService.GetServiceEntityAsync(x => x.Id == form.ServiceId);
+            if (service == null)
+            {
+                Console.WriteLine("\n Invalid Service ID. Returning to menu.");
+                await _projectRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            var entity = await _projectRepository.CreateAsync(ProjectFactory.Create(form, service));
+
+            if (entity == null)
+            {
+                await _projectRepository.RollbackTransactionAsync();
+                return null!;
+            }
+            await _projectRepository.CommitTransactionAsync();
+
+            var project = ProjectFactory.Create(entity);
+
+            return project ?? null!;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _projectRepository.RollbackTransactionAsync();
             return null!;
         }
-
-        var service = await _servicesService.GetServiceEntityAsync(x => x.Id == form.ServiceId);
-        if (service == null)
-        {
-            Console.WriteLine("\n Invalid Service ID. Returning to menu.");
-            return null!;
-        }
-
-        var entity = await _projectRepository.CreateAsync(ProjectFactory.Create(form, service));
-
-        if (entity == null)
-            return null!;
-        
-        var project = ProjectFactory.Create(entity);
-
-        return project ?? null!;
     }
 
     public async Task<IEnumerable<ProjectModel>> GetAllProjectsAsync()
@@ -70,57 +90,76 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerServi
 
     public async Task<ProjectModel?> UpdateProjectAsync(ProjectUpdateForm form)
     {
+        await _projectRepository.BeginTransactionAsync();
+
         try
         {
             var existingEntity = await GetProjectEntityAsync(x => x.Id == form.Id);
-
             if (existingEntity == null)
+            {
+                await _projectRepository.RollbackTransactionAsync();
                 return null!;
+            }
 
             var employee = await _employeeService.GetEmployeeEntityAsync(x => x.Id == form.EmployeeId);
             if (employee == null)
             {
-                Console.WriteLine("\nInvalid Employee ID. Failed to Update.");
+                Console.WriteLine("\nInvalid Employee ID. Rolling back transaction.");
+                await _projectRepository.RollbackTransactionAsync();
                 return null!;
             }
-
 
             var customer = await _customerService.GetCustomerEntityAsync(x => x.Id == form.CustomerId);
             if (customer == null)
             {
-                Console.WriteLine("\nInvalid Customer ID. Failed to Update.");
+                Console.WriteLine("\nInvalid Customer ID. Rolling back transaction.");
+                await _projectRepository.RollbackTransactionAsync();
                 return null!;
             }
-
 
             var service = await _servicesService.GetServiceEntityAsync(x => x.Id == form.ServiceId);
             if (service == null)
             {
-                Console.WriteLine("\nInvalid Service ID. Failed to update.");
+                Console.WriteLine("\nInvalid Service ID. Rolling back transaction.");
+                await _projectRepository.RollbackTransactionAsync();
                 return null!;
             }
-
 
             var status = await _statusService.GetStatusEntityAsync(x => x.Id == form.StatusId);
             if (status == null)
             {
-                Console.WriteLine("\nInvalid Status ID. Failed to update.");
+                Console.WriteLine("\nInvalid Status ID. Rolling back transaction.");
+                await _projectRepository.RollbackTransactionAsync();
                 return null!;
             }
 
             var updatedEntity = ProjectFactory.Update(form, existingEntity, employee, customer, service, status);
-           
             updatedEntity = await _projectRepository.UpdateAsync(x => x.Id == form.Id, updatedEntity);
+
             if (updatedEntity == null)
+            {
+                await _projectRepository.RollbackTransactionAsync();
                 return null!;
-            return ProjectFactory.Create(updatedEntity);
+            }
+
+            var project = ProjectFactory.Create(updatedEntity);
+            if (project == null)
+            {
+                await _projectRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _projectRepository.CommitTransactionAsync();
+            return project;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            await _projectRepository.RollbackTransactionAsync();
             return null;
         }
     }
+
 
     public async Task<bool> DeleteProjectAsync(int id)
     {

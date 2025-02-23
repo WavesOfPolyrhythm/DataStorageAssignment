@@ -10,5 +10,8 @@ namespace Data.Interfaces
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> expression);
         Task<TEntity?> UpdateAsync(Expression<Func<TEntity, bool>> expression, TEntity updateEntity);
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

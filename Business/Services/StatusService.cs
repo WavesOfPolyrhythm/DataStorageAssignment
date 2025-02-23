@@ -15,15 +15,37 @@ public class StatusService(IStatusRepository statusRepository) : IStatusService
 
     public async Task<StatusModel> CreateStatusesAsync(StatusRegistrationForm form)
     {
-        var existingStatus = await _statusRepository.GetAsync(x => x.StatusName == form.StatusName);
-        if (existingStatus != null)
-            return null!;
+        await _statusRepository.BeginTransactionAsync();
+        try
+        {
+            var existingStatus = await _statusRepository.GetAsync(x => x.StatusName == form.StatusName);
+            if (existingStatus != null)
+            {
+                await _statusRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        var entity = await _statusRepository.CreateAsync(StatusFactory.Create(form));
-        if (entity == null)
+            var entity = await _statusRepository.CreateAsync(StatusFactory.Create(form));
+            if (entity == null)
+            {
+                await _statusRepository.RollbackTransactionAsync();
+                return null!;
+            }
+            var status = StatusFactory.Create(entity);
+            if (status == null)
+            {
+                await _statusRepository.RollbackTransactionAsync();
+                return null!;
+            }
+            await _statusRepository.CommitTransactionAsync();
+            return status;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _statusRepository.RollbackTransactionAsync();
             return null!;
-
-        return StatusFactory.Create(entity);
+        }
     }
 
     public async Task<IEnumerable<StatusModel>> GetAllStatusesAsync()

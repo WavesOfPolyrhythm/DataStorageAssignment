@@ -15,15 +15,39 @@ public class RoleService(IRolesRepository rolesRepository) : IRoleService
 
     public async Task<RolesModel> CreateRolesAsync(RolesRegistrationForm form)
     {
-        var existingRole = await _rolesRepository.GetAsync(x => x.RoleName == form.RoleName);
-        if (existingRole != null)
-            return null!;
+        await _rolesRepository.BeginTransactionAsync();
+        try
+        {
+            var existingRole = await _rolesRepository.GetAsync(x => x.RoleName == form.RoleName);
+            if (existingRole != null)
+            {
+                await _rolesRepository.RollbackTransactionAsync();
+                return null!;
+            }
 
-        var entity = await _rolesRepository.CreateAsync(RolesFactory.Create(form));
-        if (entity == null)
-            return null!;
+            var entity = await _rolesRepository.CreateAsync(RolesFactory.Create(form));
 
-        return RolesFactory.Create(entity);
+            if (entity == null)
+            {
+                await _rolesRepository.RollbackTransactionAsync();
+                return null!;
+            }
+            var role = RolesFactory.Create(entity);
+            if (role == null)
+            {
+                await _rolesRepository.RollbackTransactionAsync();
+                return null!;
+            }
+
+            await _rolesRepository.CommitTransactionAsync();
+            return role;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await _rolesRepository.RollbackTransactionAsync();
+            return null!;
+        }
     }
 
     public async Task<IEnumerable<RolesModel>> GetAllRolesAsync()

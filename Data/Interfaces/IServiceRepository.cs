@@ -3,5 +3,5 @@ namespace Data.Interfaces;
 
 public interface IServiceRepository : IBaseRepository<ServiceEntity>
 {
-
+ 
 }
