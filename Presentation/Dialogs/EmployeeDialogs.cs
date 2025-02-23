@@ -53,13 +53,24 @@ public class EmployeeDialogs(IEmployeeService employeeService, IRoleService role
 
     public async Task CreateEmployeeDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
+        var form = new EmployeeRegistrationForm();
         Console.Clear();
         Console.WriteLine("\n--ADD EMPLOYEE--\n");
-        var form = new EmployeeRegistrationForm();
         Console.Write("Enter first and last Name of Employee: ");
         form.Name = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.Name))
+        {
+            outputMethods.OutputDialog("\nName cannot be empty. Please try again...");
+            return;
+        }
         Console.Write("\nEnter Email of Employee: ");
         form.Email = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.Email))
+        {
+            outputMethods.OutputDialog("\nEmail cannot be empty. Please try again...");
+            return;
+        }
         Console.WriteLine("\nSelect a Role for the Employee.\n");
         var roles = await _roleService.GetAllRolesAsync();
         if (roles != null)

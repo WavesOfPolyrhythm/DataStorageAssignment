@@ -54,15 +54,25 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
 
     public async Task CreateUnitDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
+        var form = new UnitRegistrationForm();
         Console.Clear();
         Console.WriteLine("\n--Creating new Unit--\n");
 
-        var form = new UnitRegistrationForm();
         Console.Write("Unit-Title: ");
         form.Name = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.Name))
+        {
+            outputMethods.OutputDialog("\nEmail cannot be empty. Please try again...");
+            return;
+        }
         Console.Write("Unit Description: ");
         form.Description = Console.ReadLine()!;
-
+        if (string.IsNullOrWhiteSpace(form.Description))
+        {
+            outputMethods.OutputDialog("\nDescription cannot be empty. Please try again...");
+            return;
+        }
         var result = await _unitService.CreateUnitsAsync(form);
 
         if (result != null)

@@ -56,14 +56,29 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
 
     public async Task CreateServicesDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
+        var form = new ServicesRegistrationForm();
         Console.Clear();
         Console.WriteLine("\n--CREATE SERVICE--\n");
 
-        var form = new ServicesRegistrationForm();
         Console.Write("Enter name of Service: ");
         form.Name = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.Name))
+        {
+            outputMethods.OutputDialog("\nName cannot be empty. Please try again...");
+            return;
+        }
+
         Console.Write("Enter Price: ");
-        form.Price = decimal.Parse(Console.ReadLine()!);
+        if (decimal.TryParse(Console.ReadLine(), out decimal price))
+        {
+            form.Price = price;
+        }
+        else
+        {
+            Console.WriteLine("Invalid price. Please try agian");
+        }
+
         Console.WriteLine("\nSelect Unit for the Service: ");
         var units = await _unitService.GetAllUnitsAsync();
 
@@ -121,9 +136,10 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
 
     public async Task UpdateServiceDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
+        var services = await _servicesService.GetAllServicesAsync();
         Console.Clear();
         Console.WriteLine("\n--UPDATE SERVICE--\n");
-        var services = await _servicesService.GetAllServicesAsync();
         if(services.Any())
         {
             foreach (var service in services)
@@ -146,9 +162,12 @@ public class ServiceDialogs(IServicesService servicesService, IUnitService unitS
         }
         Console.Write("\nName of the Role - (leave blank to keep current): ");
         var serviceName = Console.ReadLine()!;
-        Console.Write("\nEnter Price of Service - (leave blank to keep current): ");
-        var servicePrice = decimal.Parse(Console.ReadLine()!);
-     
+
+        Console.Write("\nEnter Price of Service ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal servicePrice))
+        {
+            Console.WriteLine("Invalid price. Please try agian");
+        }
         var updateService = new ServicesUpdateForm
         {
             Id = serviceId,

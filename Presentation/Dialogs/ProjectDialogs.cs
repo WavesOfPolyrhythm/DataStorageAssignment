@@ -300,18 +300,10 @@ public class ProjectDialogs(IProjectService projectService, ICustomerService cus
 
         Console.Write("\nEnter new Title - (leave blank to keep current): ");
         var projectTitle = Console.ReadLine()!;
-        if (string.IsNullOrWhiteSpace(projectTitle))
-        {
-            outputMethods.OutputDialog("\nTitle cannot be empty. Please try again...");
-            return;
-        }
+
         Console.Write("\nEnter new Description - (leave blank to keep current): ");
         var projectDescription = Console.ReadLine()!;
-        if (string.IsNullOrWhiteSpace(projectDescription))
-        {
-            outputMethods.OutputDialog("\nDescription cannot be empty. Please try again...");
-            return;
-        }
+
         Console.Write("\nEnter new Start Date (yyyy-MM-dd) ");
         if (!DateTime.TryParse(Console.ReadLine(), out var startDate))
         {

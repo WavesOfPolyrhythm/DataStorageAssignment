@@ -52,10 +52,10 @@ public class CustomerContactDialogs(ICustomerContactService customerContactServi
 
     public async Task CreateCustomerContactDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
+        var form = new CustomerContactRegistrationForm();
         Console.Clear();
         Console.WriteLine("\n--ADD CUSTOMER CONTACT--\n");
-
-        var form = new CustomerContactRegistrationForm();
 
         var customers = await _customerService.GetAllCustomersAsync();
         Console.WriteLine();
@@ -82,10 +82,27 @@ public class CustomerContactDialogs(ICustomerContactService customerContactServi
 
         Console.Write("Enter First and Last name: ");
         form.Name = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.Name))
+        {
+            outputMethods.OutputDialog("\nName cannot be empty. Please try again...");
+            return;
+        }
+
         Console.Write("Enter Phonenumber: ");
         form.PhoneNumber = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.PhoneNumber))
+        {
+            outputMethods.OutputDialog("\nPhonenumber cannot be empty. Please try again...");
+            return;
+        }
+
         Console.Write("Enter Email: ");
         form.Email = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.Email))
+        {
+            outputMethods.OutputDialog("\nEmail cannot be empty. Please try again...");
+            return;
+        }
 
 
         var result = await _customerContactService.CreateCustomerContactAsync(form);

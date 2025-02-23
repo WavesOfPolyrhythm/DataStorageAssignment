@@ -58,12 +58,18 @@ internal class CustomerDialogs(ICustomerService customerService, ICustomerContac
 
     public async Task CreateCustomerDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
         Console.Clear();
         Console.WriteLine("\n--ADD CUSTOMER--\n");
         var form = new CustomerRegistrationForm();
 
         Console.Write("Enter Customer Company Name: ");
         form.CustomerName = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.CustomerName))
+        {
+            outputMethods.OutputDialog("\nName cannot be empty. Please try again...");
+            return;
+        }
 
         var result = await _customerService.CreateCustomerAsync(form);
         if (result != null)

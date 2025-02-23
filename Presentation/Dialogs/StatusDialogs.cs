@@ -55,11 +55,17 @@ public class StatusDialogs(IStatusService statusService) : IStatusDialogs
 
     public async Task CreateStatusDialog()
     {
+        var outputMethods = new OutputMethodsDialog();
+        var form = new StatusRegistrationForm();
         Console.Clear();
         Console.WriteLine("\n--CREATING NEW STATUS--");
         Console.WriteLine("Enter name of the Status, Example: 'In progress'");
-        var form = new StatusRegistrationForm();
         form.StatusName = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.StatusName))
+        {
+            outputMethods.OutputDialog("\nName cannot be empty. Please try again...");
+            return;
+        }
 
         var result = await _statusService.CreateStatusesAsync(form);
 

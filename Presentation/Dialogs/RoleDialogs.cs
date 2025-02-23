@@ -55,12 +55,18 @@ public class RoleDialogs(IRoleService roleService) : IRoleDialogs
 
     public async Task CreateRoleAsync()
     {
+        var outputMethods = new OutputMethodsDialog();
         Console.Clear();
         Console.WriteLine("\n--CREATE ROLE MENU--");
         Console.Write("\nEnter name of the Role you want to create: ");
 
         var form = new RolesRegistrationForm();
         form.RoleName = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(form.RoleName))
+        {
+            outputMethods.OutputDialog("\nName cannot be empty. Please try again...");
+            return;
+        }
 
         var result = await _roleService.CreateRolesAsync(form);
 
