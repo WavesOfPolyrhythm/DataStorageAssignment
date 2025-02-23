@@ -168,4 +168,5 @@ public class StatusDialogs(IStatusService statusService) : IStatusDialogs
             Console.WriteLine("\nFailed to remove status.");
         }
     }
+
 }

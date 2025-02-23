@@ -160,5 +160,6 @@ public class UnitDialogs(IUnitService unitService) : IUnitDialogs
             Console.WriteLine("\nFailed to remove unit.");
         }
     }
+
 }
 
