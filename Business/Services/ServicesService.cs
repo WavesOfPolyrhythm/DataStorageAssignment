@@ -64,7 +64,7 @@ public class ServicesService(IServiceRepository serviceRepository, IUnitService 
     }
 
     public async Task<ServicesModel?> UpdateServiceAsync(ServicesUpdateForm form)
-{
+    {
     await _serviceRepository.BeginTransactionAsync();
     try
     {

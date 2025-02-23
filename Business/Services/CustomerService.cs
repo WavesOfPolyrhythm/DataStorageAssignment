@@ -19,7 +19,7 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
         try
         {
             var existingCustomer = await _customerRepository.GetAsync(x => x.CustomerName == form.CustomerName);
-            if (existingCustomer == null)
+            if (existingCustomer != null)
             {
                 await _customerRepository.RollbackTransactionAsync();
                 return null!;

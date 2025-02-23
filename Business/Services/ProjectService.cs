@@ -32,7 +32,7 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerServi
         try
         {
             var existingProject = await _projectRepository.GetAsync(x => x.Title == form.Title);
-            if (existingProject == null)
+            if (existingProject != null)
             {
                 await _projectRepository.RollbackTransactionAsync();
                 return null!;
@@ -61,9 +61,8 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerServi
                 await _projectRepository.RollbackTransactionAsync();
                 return null!;
             }
-            await _projectRepository.CommitTransactionAsync();
-
             var project = ProjectFactory.Create(entity);
+            await _projectRepository.CommitTransactionAsync();
 
             return project ?? null!;
         }
